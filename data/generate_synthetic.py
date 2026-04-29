@@ -56,12 +56,23 @@ def generate_trajectory(
     }
 
 
+# Fixed seeds — Python's built-in hash() randomizes per process under default
+# PYTHONHASHSEED, so hash(name) here would produce different "synthetic truth"
+# every run. That breaks reproducibility for graders re-running the notebooks.
+PROFILE_SEEDS: dict[str, int] = {
+    "saas": 1,
+    "marketplace": 2,
+    "enterprise": 3,
+    "viral": 4,
+}
+
+
 def main(out_dir: Path) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     profiles = preset_profiles()
     y0 = np.array([100.0, 0.0, 0.0, 1_000_000.0])
     for name, params in profiles.items():
-        data = generate_trajectory(params, y0, seed=hash(name) & 0xFFFF)
+        data = generate_trajectory(params, y0, seed=PROFILE_SEEDS[name])
         path = out_dir / f"{name}.json"
         with open(path, "w") as f:
             json.dump(data, f, indent=2)

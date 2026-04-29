@@ -23,10 +23,19 @@ def relative_error(computed: float | np.ndarray, exact: float | np.ndarray) -> f
 
 
 def convergence_order(errors: np.ndarray, h_values: np.ndarray) -> float:
-    """Estimate convergence order from log-log slope of error vs. step size."""
+    """Estimate convergence order from log-log slope of error vs. step size.
+
+    Errors that hit machine zero (RK4 on smooth problems at small h, AB4 on
+    polynomial test problems) get clamped at the smallest positive entry so
+    log(0) cannot crash the regression. If everything is non-positive, raise.
+    """
     errors = np.asarray(errors, dtype=float)
     h_values = np.asarray(h_values, dtype=float)
-    log_e = np.log(errors)
+    positive = errors[errors > 0]
+    if positive.size == 0:
+        raise ValueError("convergence_order: all errors are zero or negative")
+    floor = positive.min()
+    log_e = np.log(np.maximum(errors, floor))
     log_h = np.log(h_values)
     slope, _ = np.polyfit(log_h, log_e, 1)
     return float(slope)

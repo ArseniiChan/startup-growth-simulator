@@ -56,17 +56,19 @@ Model a startup's key metrics as a coupled system of ordinary differential equat
 ```
 dU/dt = g · U · (1 - U/K)                        — logistic user acquisition, carrying capacity K
 dA/dt = α · g · U · (1 - U/K) - μ · A            — conversion rate α, user churn rate μ
-dR/dt = p · α · g · U · (1 - U/K) - μ_R · R      — ARPU p, revenue decay rate μ_R
-dCash/dt = R - F - v · g · U · (1 - U/K)          — revenue minus costs
+dR/dt = μ_R · (p · A - R)                        — first-order lag toward p · A
+dCash/dt = R - F - v · g · U · (1 - U/K)         — revenue minus costs
 ```
 
 This is a **4-dimensional nonlinear ODE system** already in standard form (every RHS depends only on t, U, A, R, Cash). The logistic term (1 - U/K) creates the S-curve growth pattern that real startups exhibit.
 
-**Why this revenue equation:** Revenue increases from newly converted paying users (rate p · α · dU/dt) and decays from all forms of revenue loss at rate μ_R (cancellations + downgrades combined). An earlier version used dR/dt = p · dA/dt - μ_r · R, but that double-counts churn: when users churn, dA/dt goes negative (hitting revenue via p · dA/dt) AND μ_r · R hits revenue again. The current form avoids this by sourcing new revenue only from new conversions.
+**Why this revenue equation (revised after Phase 1 review):** A subscription business's MRR is fundamentally `R = p · A` — price times active paying users. The lag `dR/dt = μ_R · (p · A - R)` captures the gap between user state changes and recognized MRR: annual contracts, deferred-revenue recognition, dunning windows, and billing-cycle delays. The 1/μ_R timescale is the *billing-cycle lag*. At steady state R* = p · A. At saturation (U=K, dU/dt=0) revenue follows A toward zero rather than collapsing on its own.
+
+An earlier draft used `dR/dt = p · α · g · U · (1 - U/K) - μ_R · R` justified as "avoiding double-counting churn." That form had a structural defect: at saturation (no new signups) R decayed to zero regardless of how many users were paying, which is wrong for any subscription business. The "double-counting" justification conflated user churn (μ · A, hitting A directly) with revenue-only erosion (μ_R · R, a separate lag effect); they are not redundant when μ_R is interpreted as a billing/recognition lag rather than as user churn.
 
 **Why Cash(t) instead of "cumulative burn":** Cash balance has a natural initial condition (funding raised), and dCash/dt can be positive or negative. This gives us two root-finding problems: break-even (when dCash/dt = 0, i.e., R = F + v · dU/dt) and runway death (when Cash(t) = 0).
 
-**Parameters:** g (growth rate), K (market size), α (conversion), μ (user churn), p (ARPU), μ_R (revenue decay rate), F (fixed costs), v (variable cost per acquisition).
+**Parameters:** g (growth rate), K (market size), α (conversion), μ (user churn), p (ARPU), μ_R (MRR-tracking lag rate; 1/μ_R is the billing-cycle lag), F (fixed costs), v (variable cost per acquisition).
 
 ### 3.2 ODE Solvers — SP 18
 
