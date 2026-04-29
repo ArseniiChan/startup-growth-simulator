@@ -167,3 +167,61 @@ def clip_params(theta: np.ndarray, fit_indices: Sequence[int] | None = None) -> 
         return np.clip(theta, StartupParams.LOWER, StartupParams.UPPER)
     idx = list(fit_indices)
     return np.clip(theta, StartupParams.LOWER[idx], StartupParams.UPPER[idx])
+
+
+def mse_loss(
+    theta: np.ndarray,
+    observed_t: np.ndarray,
+    observed_R: np.ndarray,
+    base_params: StartupParams,
+    fit_indices: Sequence[int],
+    solver,
+    y0: np.ndarray,
+    t_span: tuple[float, float],
+    h: float = 0.1,
+) -> float:
+    """MSE between model-predicted MRR and observed MRR at observed_t.
+
+    Steps: rebuild StartupParams from theta -> solve ODE -> linearly
+    interpolate the model R(t) onto observed_t -> mean squared error.
+
+    Important: this function does NOT clip theta to bounds. Clipping inside
+    the loss makes central-difference gradients asymmetric near a bound
+    (one side clipped, one side not, gradient wrong by O(1) instead of
+    O(h^2)). Callers that need bounds enforcement should pass `project=
+    clip_params(..., fit_indices)` to the optimizer; that clips at step
+    boundaries, not inside the gradient stencil.
+    """
+    from engine.utils import linear_interpolate
+
+    theta = np.asarray(theta, dtype=float)
+    params = array_to_params(theta, base_params, fit_indices)
+    t, y = solver(growth_system, y0, t_span, h, params)
+    R_model = linear_interpolate(t, y[:, 2], observed_t)
+    diff = R_model - observed_R
+    return float(np.mean(diff * diff))
+
+
+def make_loss_fn(
+    observed_t: np.ndarray,
+    observed_R: np.ndarray,
+    base_params: StartupParams,
+    fit_indices: Sequence[int],
+    solver,
+    y0: np.ndarray,
+    t_span: tuple[float, float],
+    h: float = 0.1,
+):
+    """Closure factory: returns loss(theta) -> float for the optimizer.
+
+    Keeps the optimizer agnostic to startup-specific signatures.
+    """
+    obs_t = np.asarray(observed_t, dtype=float)
+    obs_R = np.asarray(observed_R, dtype=float)
+
+    def loss(theta: np.ndarray) -> float:
+        return mse_loss(
+            theta, obs_t, obs_R, base_params, fit_indices, solver, y0, t_span, h
+        )
+
+    return loss

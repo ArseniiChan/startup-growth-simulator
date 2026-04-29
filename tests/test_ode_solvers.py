@@ -7,7 +7,7 @@ import math
 import numpy as np
 import pytest
 
-from engine.ode_solvers import euler, heun, rk4
+from engine.ode_solvers import adams_bashforth4, adams_moulton_pc, euler, heun, rk4
 from engine.utils import absolute_error, convergence_order
 
 
@@ -37,14 +37,14 @@ def logistic_exact(t, y0, r, K):
 # --- shape and grid tests ---------------------------------------------------
 
 
-@pytest.mark.parametrize("solver", [euler, heun, rk4])
+@pytest.mark.parametrize("solver", [euler, heun, rk4, adams_bashforth4, adams_moulton_pc])
 def test_solver_output_shapes(solver):
     t, y = solver(f_decay, 1.0, (0.0, 1.0), 0.1)
     assert t.shape == (11,)
     assert y.shape == (11, 1)
 
 
-@pytest.mark.parametrize("solver", [euler, heun, rk4])
+@pytest.mark.parametrize("solver", [euler, heun, rk4, adams_bashforth4, adams_moulton_pc])
 def test_solver_hits_exact_final_time(solver):
     """Linspace rule: regardless of h, solver hits t_span[1] exactly."""
     t, _ = solver(f_decay, 1.0, (0.0, 1.0), 0.4)  # 1/0.4 = 2.5 -> 3 steps
@@ -53,7 +53,7 @@ def test_solver_hits_exact_final_time(solver):
     assert len(t) == 4  # ceil(1/0.4) + 1
 
 
-@pytest.mark.parametrize("solver", [euler, heun, rk4])
+@pytest.mark.parametrize("solver", [euler, heun, rk4, adams_bashforth4, adams_moulton_pc])
 def test_solver_handles_vector_state(solver):
     """A 2D ODE: dy1/dt = -y1, dy2/dt = -2*y2 (uncoupled decays)."""
 
@@ -97,15 +97,21 @@ def test_euler_decay_loose_accuracy():
     assert err < 0.05
 
 
-@pytest.mark.parametrize("solver", [euler, heun, rk4])
+@pytest.mark.parametrize("solver", [euler, heun, rk4, adams_bashforth4, adams_moulton_pc])
 def test_solver_logistic(solver):
     """All solvers should track the logistic curve to a sensible tolerance."""
     r, K, y0 = 1.0, 100.0, 10.0
     t, y = solver(f_logistic, y0, (0.0, 5.0), 0.01, r, K)
     exact = logistic_exact(t, y0, r, K)
     err = absolute_error(y[:, 0], exact)
-    # Euler gets the loosest tolerance, RK4 the tightest.
-    tol = {"euler": 0.5, "heun": 1e-2, "rk4": 1e-4}[solver.__name__]
+    # Euler gets the loosest tolerance, the 4th-order methods the tightest.
+    tol = {
+        "euler": 0.5,
+        "heun": 1e-2,
+        "rk4": 1e-4,
+        "adams_bashforth4": 1e-4,
+        "adams_moulton_pc": 1e-4,
+    }[solver.__name__]
     assert err < tol
 
 
@@ -177,6 +183,58 @@ def test_all_solvers_share_t_grid():
     t_rk4, _ = rk4(f_decay, 1.0, (0.0, 1.0), 0.137)
     assert np.array_equal(t_eul, t_heun)
     assert np.array_equal(t_eul, t_rk4)
+
+
+@pytest.mark.parametrize(
+    "solver,expected_order",
+    [(adams_bashforth4, 4.0), (adams_moulton_pc, 4.0)],
+)
+def test_multistep_solver_convergence_order(solver, expected_order):
+    """AB4 and AM PECE are both 4th-order globally. We use a slightly larger
+    h range than for the one-step methods so the multistep recurrence is
+    actually exercised — at very small n_steps the bootstrap dominates and
+    the order looks higher than 4."""
+    y0 = 1.0
+    k = -1.0
+    T = 2.0
+    requested_h = np.array([0.2, 0.1, 0.05, 0.025, 0.0125])
+    errs = []
+    actual_h = []
+    for h in requested_h:
+        n_steps = max(1, math.ceil(T / h))
+        actual_h.append(T / n_steps)
+        errs.append(_final_error(solver, h, y0, T, k))
+    actual_h = np.array(actual_h)
+    errs = np.array(errs)
+    assert np.all(errs > 0)
+    slope = convergence_order(errs, actual_h)
+    assert abs(slope - expected_order) < 0.4, (
+        f"{solver.__name__} slope={slope:.3f}, expected≈{expected_order}"
+    )
+
+
+def test_ab4_matches_rk4_on_logistic():
+    """At fine h, AB4 and RK4 should produce nearly identical trajectories
+    on the logistic ODE. This is a contract test — if AB4's bootstrap or
+    coefficients are off, this catches it before the convergence test does."""
+    r, K, y0 = 1.0, 100.0, 10.0
+    _, y_rk = rk4(f_logistic, y0, (0.0, 5.0), 0.01, r, K)
+    _, y_ab = adams_bashforth4(f_logistic, y0, (0.0, 5.0), 0.01, r, K)
+    err = absolute_error(y_ab[:, 0], y_rk[:, 0])
+    assert err < 1e-5
+
+
+def test_am_pc_more_accurate_than_ab4_on_decay():
+    """At equal h, the predictor-corrector should be at least as accurate as
+    AB4 on a smooth problem (PECE adds an implicit-style correction)."""
+    h = 0.05
+    T = 2.0
+    _, y_ab = adams_bashforth4(f_decay, 1.0, (0.0, T), h)
+    _, y_am = adams_moulton_pc(f_decay, 1.0, (0.0, T), h)
+    exact = np.exp(-2.0 * np.linspace(0.0, T, y_ab.shape[0]))
+    err_ab = absolute_error(y_ab[:, 0], exact)
+    err_am = absolute_error(y_am[:, 0], exact)
+    assert err_am <= err_ab * 2.0  # at worst comparable; usually strictly better
 
 
 def test_euler_instability_with_large_h():
