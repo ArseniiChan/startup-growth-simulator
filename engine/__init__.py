@@ -20,6 +20,15 @@ Numerical differentiation:
 Root finding:
     newton, bisection, secant, find_brackets
 
+Integration:
+    composite_simpson, gaussian_quadrature, integrate_trajectory
+
+Interpolation:
+    thomas_solve, cubic_spline_natural, cubic_spline_clamped
+
+Monte Carlo:
+    kahan_sum, naive_sum, run_simulation, convergence_study
+
 Utilities:
     absolute_error, relative_error, convergence_order,
     linear_interpolate, timer, latex_table
@@ -53,6 +62,22 @@ from engine.ode_solvers import (
     heun,
     rk4,
 )
+from engine.integration import (
+    composite_simpson,
+    gaussian_quadrature,
+    integrate_trajectory,
+)
+from engine.interpolation import (
+    cubic_spline_clamped,
+    cubic_spline_natural,
+    thomas_solve,
+)
+from engine.monte_carlo import (
+    convergence_study,
+    kahan_sum,
+    naive_sum,
+    run_simulation,
+)
 from engine.optimizer import adam, gradient_descent, numerical_gradient
 from engine.root_finding import bisection, find_brackets, newton, secant
 from engine.utils import (
@@ -78,6 +103,12 @@ __all__ = [
     "richardson", "optimal_h_study", "sensitivity_analysis",
     # root_finding
     "newton", "bisection", "secant", "find_brackets",
+    # integration
+    "composite_simpson", "gaussian_quadrature", "integrate_trajectory",
+    # interpolation
+    "thomas_solve", "cubic_spline_natural", "cubic_spline_clamped",
+    # monte_carlo
+    "kahan_sum", "naive_sum", "run_simulation", "convergence_study",
     # utils
     "absolute_error", "relative_error", "convergence_order",
     "linear_interpolate", "timer", "latex_table",
