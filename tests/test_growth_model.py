@@ -12,6 +12,8 @@ from engine.growth_model import (
     clip_params,
     default_params,
     growth_system,
+    make_loss_fn,
+    mse_loss,
     params_to_array,
     preset_profiles,
 )
@@ -153,6 +155,50 @@ def test_growth_system_integrates_cleanly_through_rk4():
     assert U[-1] < p.K  # never crosses carrying capacity
     assert A[-1] > 0 and R[-1] > 0  # acquisition + lag both produce signal
     assert Cash[-1] < y0[3]  # seed-stage burns cash over 24 months
+
+
+def test_mse_loss_zero_at_truth():
+    """If theta equals the true params used to generate the data, loss is 0."""
+    base = default_params()
+    y0 = np.array([100.0, 0.0, 0.0, 1_000_000.0])
+    T = 24.0
+    t, y = rk4(growth_system, y0, (0.0, T), 0.1, base)
+    obs_t = np.linspace(0.0, T, 9)
+    obs_R = np.interp(obs_t, t, y[:, 2])
+
+    fit_indices = [0, 5]  # g, mu_R
+    theta_truth = params_to_array(base, fit_indices)
+    loss = mse_loss(theta_truth, obs_t, obs_R, base, fit_indices, rk4, y0, (0.0, T))
+    assert loss < 1e-3  # tiny nonzero from the linear interpolation
+
+
+def test_mse_loss_grows_when_params_drift():
+    """Perturbing g away from truth must strictly increase the loss."""
+    base = default_params()
+    y0 = np.array([100.0, 0.0, 0.0, 1_000_000.0])
+    T = 24.0
+    t, y = rk4(growth_system, y0, (0.0, T), 0.1, base)
+    obs_t = np.linspace(0.0, T, 9)
+    obs_R = np.interp(obs_t, t, y[:, 2])
+
+    fit_indices = [0]  # only g
+    truth = mse_loss(np.array([base.g]), obs_t, obs_R, base, fit_indices, rk4, y0, (0.0, T))
+    drift = mse_loss(np.array([0.5 * base.g]), obs_t, obs_R, base, fit_indices, rk4, y0, (0.0, T))
+    assert drift > truth + 1e-3
+
+
+def test_make_loss_fn_returns_callable_with_correct_value():
+    base = default_params()
+    y0 = np.array([100.0, 0.0, 0.0, 1_000_000.0])
+    T = 12.0
+    t, y = rk4(growth_system, y0, (0.0, T), 0.1, base)
+    obs_t = np.linspace(0.0, T, 5)
+    obs_R = np.interp(obs_t, t, y[:, 2])
+    fit_indices = [0, 5]
+    loss = make_loss_fn(obs_t, obs_R, base, fit_indices, rk4, y0, (0.0, T))
+    theta = params_to_array(base, fit_indices)
+    direct = mse_loss(theta, obs_t, obs_R, base, fit_indices, rk4, y0, (0.0, T))
+    assert loss(theta) == direct
 
 
 def test_growth_system_bounded_at_large_carrying_capacity():
