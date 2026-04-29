@@ -216,3 +216,11 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Project-specific
+# Lecture slides (copyrighted reference material — kept locally only)
+slides/
+# Synthetic datasets (regenerable via `python -m data.generate_synthetic`)
+data/synthetic/
+# Built figures from notebook runs
+report/figures/

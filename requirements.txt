@@ -1,0 +1,9 @@
+numpy>=1.26
+matplotlib>=3.8
+plotly>=5.18
+streamlit>=1.30
+yfinance>=0.2.31
+pytest>=8.0
+black
+isort
+jupyter>=7.0
