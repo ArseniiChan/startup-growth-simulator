@@ -12,6 +12,15 @@ import numpy as np
 PARAM_NAMES: tuple[str, ...] = ("g", "K", "alpha", "mu", "p", "mu_R", "F", "v")
 
 
+def _assert_param_names_match_fields() -> None:
+    """Drift guard: PARAM_NAMES order must match StartupParams field order."""
+    field_names = tuple(f.name for f in fields(StartupParams))
+    if field_names != PARAM_NAMES:
+        raise RuntimeError(
+            f"PARAM_NAMES {PARAM_NAMES} drifted from StartupParams fields {field_names}"
+        )
+
+
 @dataclass
 class StartupParams:
     """Parameters for the 4D startup growth ODE system.
@@ -21,7 +30,8 @@ class StartupParams:
     alpha : conversion rate of new signups to paying users.
     mu    : monthly user churn rate for paying users.
     p     : ARPU (average revenue per paying user per month).
-    mu_R  : monthly revenue decay rate (cancellations + downgrades combined).
+    mu_R  : MRR-tracking lag rate (1/mu_R is the billing-cycle / deferred-
+            revenue lag time; R relaxes toward p*A at rate mu_R).
     F     : fixed monthly costs.
     v     : variable cost per newly acquired user.
     """
@@ -41,14 +51,24 @@ class StartupParams:
     )
 
 
+_assert_param_names_match_fields()
+
+
 def growth_system(t: float, y: np.ndarray, params: StartupParams) -> np.ndarray:
     """The 4D ODE system in standard form f(t, y, params) -> dy/dt.
 
     State y = [U, A, R, Cash]:
         dU/dt    = g * U * (1 - U/K)
         dA/dt    = alpha * g * U * (1 - U/K) - mu * A
-        dR/dt    = p * alpha * g * U * (1 - U/K) - mu_R * R
+        dR/dt    = mu_R * (p * A - R)
         dCash/dt = R - F - v * g * U * (1 - U/K)
+
+    The revenue equation is a first-order lag toward the algebraic identity
+    R = p*A: at any fixed A, R relaxes toward p*A on timescale 1/mu_R. This
+    captures the "billing-cycle lag" between user state changes and recognized
+    MRR (annual contracts, deferred revenue, dunning windows). The earlier
+    formulation dR/dt = p*alpha*dU/dt - mu_R*R was numerically wrong: at
+    saturation (dU/dt=0) it forced R -> 0 regardless of paying users A.
 
     The system is autonomous (no explicit t dependence), but t is kept in the
     signature so every solver can use a single uniform interface.
@@ -58,7 +78,7 @@ def growth_system(t: float, y: np.ndarray, params: StartupParams) -> np.ndarray:
 
     dU = new_users
     dA = params.alpha * new_users - params.mu * A
-    dR = params.p * params.alpha * new_users - params.mu_R * R
+    dR = params.mu_R * (params.p * A - R)
     dCash = R - params.F - params.v * new_users
     return np.array([dU, dA, dR, dCash], dtype=float)
 

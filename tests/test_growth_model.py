@@ -15,6 +15,7 @@ from engine.growth_model import (
     params_to_array,
     preset_profiles,
 )
+from engine.ode_solvers import rk4
 
 
 def test_growth_system_returns_4d_array():
@@ -35,14 +36,34 @@ def test_growth_system_zero_users_zero_growth():
     assert dy[3] == -p.F  # cash burns at fixed cost rate
 
 
-def test_growth_system_revenue_decay_with_no_acquisition():
-    """If U=K (saturated) then no new users; dR/dt = -mu_R * R."""
+def test_growth_system_revenue_lags_toward_pA_at_saturation():
+    """At saturation (U=K, dU/dt=0) revenue lags toward p*A, not toward zero.
+
+    With R0 < p*A0 the lag pushes R upward; with R0 > p*A0 the lag pulls it
+    down. Either way the equilibrium is p*A, never zero (which would be the
+    case under the discarded dR/dt = p*alpha*dU/dt - mu_R*R formulation).
+    """
     p = default_params()
-    R0 = 500_000.0
-    y = np.array([p.K, 1000.0, R0, 0.0])
+    A0 = 1_000.0
+    R_below = 0.5 * p.p * A0
+    R_above = 2.0 * p.p * A0
+    y_below = np.array([p.K, A0, R_below, 0.0])
+    y_above = np.array([p.K, A0, R_above, 0.0])
+    dy_below = growth_system(0.0, y_below, p)
+    dy_above = growth_system(0.0, y_above, p)
+    assert dy_below[0] == pytest.approx(0.0, abs=1e-9)
+    assert dy_below[2] == pytest.approx(p.mu_R * (p.p * A0 - R_below))
+    assert dy_below[2] > 0  # R below p*A pushes upward
+    assert dy_above[2] < 0  # R above p*A pulls downward
+
+
+def test_growth_system_revenue_at_pA_is_stationary():
+    """If R = p*A then dR/dt = 0 regardless of acquisition rate."""
+    p = default_params()
+    A = 5_000.0
+    y = np.array([100.0, A, p.p * A, 0.0])
     dy = growth_system(0.0, y, p)
-    assert dy[0] == pytest.approx(0.0, abs=1e-9)
-    assert dy[2] == pytest.approx(-p.mu_R * R0)
+    assert dy[2] == pytest.approx(0.0, abs=1e-9)
 
 
 def test_growth_system_cash_at_break_even():
@@ -115,3 +136,32 @@ def test_clip_params_subset():
     clipped = clip_params(theta, fit_indices=fit)
     assert clipped[0] == StartupParams.UPPER[0]
     assert clipped[1] == StartupParams.UPPER[3]
+
+
+def test_growth_system_integrates_cleanly_through_rk4():
+    """End-to-end sanity: integrate the coupled 4D system from a seed-stage
+    state for 24 months and check the trajectory is finite, monotone where it
+    should be, and bounded by the carrying capacity. This is the regression
+    guard against catastrophic cancellation at large K, NaN propagation, and
+    sign errors in the coupling between equations."""
+    p = default_params()
+    y0 = np.array([100.0, 0.0, 0.0, 1_000_000.0])
+    t, y = rk4(growth_system, y0, (0.0, 24.0), 0.1, p)
+    U, A, R, Cash = y[:, 0], y[:, 1], y[:, 2], y[:, 3]
+    assert np.all(np.isfinite(y))
+    assert np.all(np.diff(U) >= 0)  # users grow monotonically (logistic)
+    assert U[-1] < p.K  # never crosses carrying capacity
+    assert A[-1] > 0 and R[-1] > 0  # acquisition + lag both produce signal
+    assert Cash[-1] < y0[3]  # seed-stage burns cash over 24 months
+
+
+def test_growth_system_bounded_at_large_carrying_capacity():
+    """K=1e9 is at the upper bound; verify no overflow / cancellation when
+    U/K is computed near the upper end of the parameter range."""
+    p = StartupParams(
+        g=0.1, K=1_000_000_000, alpha=0.05, mu=0.03,
+        p=50.0, mu_R=0.04, F=50_000.0, v=10.0,
+    )
+    y0 = np.array([1_000.0, 0.0, 0.0, 1_000_000.0])
+    _, y = rk4(growth_system, y0, (0.0, 12.0), 0.1, p)
+    assert np.all(np.isfinite(y))

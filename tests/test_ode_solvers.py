@@ -145,6 +145,40 @@ def test_solver_convergence_order(solver, expected_order):
     )
 
 
+def test_rk4_exact_one_step_coefficients():
+    """Lock in RK4's k1/k2/k3/k4 weights against a hand-computed step.
+
+    For dy/dt = y, y(0)=1, h=0.5, exact one-step RK4 gives:
+        k1 = 1
+        k2 = 1 + 0.25*1 = 1.25
+        k3 = 1 + 0.25*1.25 = 1.3125
+        k4 = 1 + 0.5*1.3125 = 1.65625
+        y(0.5) = 1 + (0.5/6)*(1 + 2*1.25 + 2*1.3125 + 1.65625) = 1.6484375
+
+    A wrong coefficient (e.g., k4 weight 0.5 instead of 1, or the (1/6,2/6,
+    2/6,1/6) blend off) would still pass the loose slope-tolerance test but
+    fails this. Catches one kind of bug the convergence test cannot.
+    """
+
+    def f(t, y):
+        return y
+
+    _, y = rk4(f, 1.0, (0.0, 0.5), 0.5)
+    assert y.shape == (2, 1)
+    assert y[1, 0] == pytest.approx(1.6484375, abs=1e-12)
+
+
+def test_all_solvers_share_t_grid():
+    """AB4 in Phase 2 will bootstrap from RK4 — the bootstrap is correct only
+    if all solvers produce identical t arrays for the same h. The linspace
+    rule guarantees this; this test is the contract."""
+    t_eul, _ = euler(f_decay, 1.0, (0.0, 1.0), 0.137)  # h that doesn't divide T
+    t_heun, _ = heun(f_decay, 1.0, (0.0, 1.0), 0.137)
+    t_rk4, _ = rk4(f_decay, 1.0, (0.0, 1.0), 0.137)
+    assert np.array_equal(t_eul, t_heun)
+    assert np.array_equal(t_eul, t_rk4)
+
+
 def test_euler_instability_with_large_h():
     """For dy/dt = -50*y, Euler with h=0.05 has |1-50h|=1.5>1 so iterates blow
     up, while RK4 at the same h stays inside its stability region and decays."""
