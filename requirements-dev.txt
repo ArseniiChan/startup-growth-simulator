@@ -1,0 +1,12 @@
+# Development-only dependencies. Install locally with:
+#   pip install -r requirements.txt -r requirements-dev.txt
+#
+# These are NOT installed by Streamlit Cloud (which only reads
+# requirements.txt). They are needed for pytest / notebook authoring /
+# code formatting locally.
+pytest>=8.0
+black
+isort
+jupyter>=7.0
+plotly>=5.18    # if a future notebook adds 3D / interactive charts
+yfinance>=0.2.31  # if a future notebook adds live market data
