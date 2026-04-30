@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Force light mode regardless of the visitor's OS preference.
+   This is a single-mode design (per Executor's ship-risk rationale —
+   maintaining auto-flip would double the CSS surface). */
+:root {
+  color-scheme: light;
+}
+
+html {
+  background: #ffffff;
+  color: #0F172A;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Selection color matches the accent — completes the duotone story. */
+::selection {
+  background: #FECACA;
+  color: #7F1D1D;
+}
