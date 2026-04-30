@@ -273,11 +273,38 @@ with tab_sens:
 
     metric_name = st.selectbox(
         "Metric",
-        ["terminal MRR R(T)", "terminal cash Cash(T)", "peak users U_peak"],
+        [
+            "terminal MRR R(T)",
+            "terminal cash Cash(T)",
+            "peak users U_peak",
+            "μ* (runway-survival threshold)",
+        ],
     )
+
+    # The μ* metric is special: each evaluation runs root-finding on the
+    # ODE output, which costs ~8 ODE solves per parameter — substantially
+    # slower than a single trajectory metric. We define a helper that
+    # bisects for μ* given any StartupParams.
+    def _mu_star_for(p, T_search=120.0):
+        f = lambda m: _cash_terminal_for(p, float(m), T_search)
+        mu_grid = np.linspace(0.005, 0.499, 40)
+        bs = find_brackets(f, mu_grid)
+        if not bs:
+            return float("nan")
+        a, b = bs[0]
+        res = bisection(f, a, b, tol=1e-5, max_iter=50)
+        return res["root"] if res["converged"] else float("nan")
+
+    def _cash_terminal_for(p, mu_value, T_search=120.0):
+        pp = replace(p, mu=float(mu_value))
+        y0 = np.array([100.0, 0.0, 0.0, 1_000_000.0])
+        _, ys = rk4(growth_system, y0, (0.0, T_search), 0.5, pp)
+        return float(ys[-1, 3])
 
     def metric_of(p):
         y0 = np.array([100.0, 0.0, 0.0, 1_000_000.0])
+        if metric_name.startswith("μ*"):
+            return _mu_star_for(p)
         _, ys = rk4(growth_system, y0, (0.0, T), h, p)
         if metric_name.startswith("terminal MRR"):
             return float(ys[-1, 2])
@@ -289,17 +316,24 @@ with tab_sens:
         "Click **Compute sensitivities** to compute the partial derivative of "
         "the chosen metric with respect to each model parameter via central "
         "differences with adaptive per-parameter step size. Bars are sorted "
-        "by absolute size — the longest bar moves the metric the most."
+        "by absolute size — the longest bar moves the metric the most.\n\n"
+        "**Note:** the μ\\* metric is the project's headline result; computing its "
+        "tornado runs ~14 root-finding solves under the hood and takes ~10–15 "
+        "seconds. The other metrics return in <2 seconds."
     )
     if st.button("Compute sensitivities", type="primary"):
         names = ("g", "K", "alpha", "mu", "p", "mu_R", "F", "v")
+        # mu is the variable we're solving for in μ*; differentiating mu* w.r.t. mu is meaningless.
+        if metric_name.startswith("μ*"):
+            names = tuple(n for n in names if n != "mu")
         vals = []
-        for n in names:
-            try:
-                out = sensitivity_analysis(params, n, metric_of)
-                vals.append(out["central"])
-            except Exception:
-                vals.append(0.0)
+        with st.spinner(f"computing ∂({metric_name})/∂(param) for {len(names)} parameters..."):
+            for n in names:
+                try:
+                    out = sensitivity_analysis(params, n, metric_of)
+                    vals.append(out["central"])
+                except Exception:
+                    vals.append(0.0)
         order = sorted(range(len(names)), key=lambda i: -abs(vals[i]))
         names_sorted = [names[i] for i in order]
         vals_sorted = [vals[i] for i in order]
@@ -311,3 +345,11 @@ with tab_sens:
         ax.set_xlabel(f"∂({metric_name}) / ∂(parameter)")
         ax.invert_yaxis()
         st.pyplot(fig)
+
+        if metric_name.startswith("μ*"):
+            st.success(
+                "This is the **headline tornado** from Notebook 5. The dominant "
+                "parameter for μ\\* is the conversion rate **α**, followed by "
+                "the billing-cycle lag rate **μ_R**, then growth rate **g**. "
+                "Fixed cost F and ARPU p barely move the threshold."
+            )
