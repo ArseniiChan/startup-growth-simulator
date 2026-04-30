@@ -1,9 +1,7 @@
+# Runtime dependencies — what Streamlit Community Cloud installs.
+# Keep this list tight: every package here lengthens the deploy build and
+# eats into the free tier's 1 GB memory limit. Dev tools (pytest, black,
+# isort, jupyter) live in requirements-dev.txt instead.
 numpy>=1.26
 matplotlib>=3.8
-plotly>=5.18
 streamlit>=1.30
-yfinance>=0.2.31
-pytest>=8.0
-black
-isort
-jupyter>=7.0
