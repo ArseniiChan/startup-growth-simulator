@@ -1,0 +1,22 @@
+# Editorial Navy palette — locked by Phase 4 council.
+# These four tokens map 1:1 to the Tailwind tokens used by the landing page
+# at startup-growth.vercel.app, so the landing → dashboard handoff reads
+# as a single design system rather than two unrelated surfaces.
+#
+# Token mapping:
+#   primaryColor              → #DC2626   red-600    landing's accent (the 14.2% glyph)
+#   backgroundColor           → #FFFFFF   pure white landing's background
+#   secondaryBackgroundColor  → #F8FAFC   slate-50   landing's section-alternation cream
+#   textColor                 → #0F172A   slate-900  landing's ink
+
+[theme]
+base = "light"
+primaryColor = "#DC2626"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F8FAFC"
+textColor = "#0F172A"
+font = "sans serif"
+
+[server]
+# Default; explicit so the deployed config is documented.
+headless = true

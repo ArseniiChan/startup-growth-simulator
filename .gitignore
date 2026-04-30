@@ -224,3 +224,14 @@ slides/
 data/synthetic/
 # Built figures from notebook runs
 report/figures/
+
+# Node — covers root-level (scripts/build_deck.js tooling) and landing/
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+.vercel/
+
+# Compiled presentation artifact (regenerated from scripts/build_deck.js)
+report/presentation.pptx
