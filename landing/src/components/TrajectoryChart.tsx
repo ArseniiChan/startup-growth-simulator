@@ -40,12 +40,18 @@ interface ProfilesPayload {
   [key: string]: ProfileData;
 }
 
-const PROFILES: { key: string; label: string }[] = [
-  { key: "default-saas", label: "Default SaaS" },
-  { key: "saas", label: "SaaS" },
-  { key: "marketplace", label: "Marketplace" },
-  { key: "enterprise", label: "Enterprise" },
-  { key: "viral", label: "Viral" },
+// Profile chip labels are deliberately written in the audience's
+// vocabulary — a VC recruiter reads "Stripe-like SaaS" and instantly
+// pattern-matches to a known company shape. The underlying data
+// (default-saas / saas / marketplace / enterprise / viral) is the
+// generic synthetic profile from the engine's preset_profiles().
+// The brand names are illustrative shapes, not real-company calibrations.
+const PROFILES: { key: string; label: string; subtitle: string }[] = [
+  { key: "default-saas", label: "Stripe-like SaaS",      subtitle: "high ARPU, low churn" },
+  { key: "saas",         label: "Slack-like SaaS",       subtitle: "mid-market, freemium" },
+  { key: "marketplace",  label: "Airbnb-like marketplace", subtitle: "two-sided, low ARPU" },
+  { key: "enterprise",   label: "Workday-like enterprise", subtitle: "long sales cycle" },
+  { key: "viral",        label: "TikTok-like viral",     subtitle: "very high g, high churn" },
 ];
 
 // Editorial palette tokens (must match tailwind.config.ts)
@@ -78,15 +84,17 @@ export function TrajectoryChart() {
   }, [data, active]);
 
   const profile = data?.[active];
+  const activeProfile = PROFILES.find((p) => p.key === active);
 
   return (
     <div>
       {/* Profile chips */}
-      <div className="mb-8 flex flex-wrap gap-2">
+      <div className="mb-2 flex flex-wrap gap-2">
         {PROFILES.map((p) => (
           <button
             key={p.key}
             onClick={() => setActive(p.key)}
+            title={p.subtitle}
             className={`rounded-full px-4 py-1.5 text-xs font-semibold transition ${
               active === p.key
                 ? "bg-ink text-white"
@@ -97,6 +105,11 @@ export function TrajectoryChart() {
           </button>
         ))}
       </div>
+      {/* Subtitle for active profile — gives the chip a one-line caption
+          that lands the company-shape interpretation for a VC reader. */}
+      <p className="mb-8 font-mono text-xs text-muted">
+        <span className="text-ink">▸</span> {activeProfile?.subtitle ?? ""}
+      </p>
 
       {/* Headline metrics for the active profile */}
       {profile && (

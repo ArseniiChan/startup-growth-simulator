@@ -26,6 +26,8 @@ import { MuStarSlider } from "@/components/MuStarSlider";
 import { ValleyContour } from "@/components/ValleyContour";
 import { PosteriorHistogram } from "@/components/PosteriorHistogram";
 import { TornadoChart } from "@/components/TornadoChart";
+import { VcInsights } from "@/components/VcInsights";
+import { Reveal } from "@/components/Reveal";
 
 const REPO_URL = "https://github.com/ArseniiChan/startup-growth-simulator";
 const STREAMLIT_URL = "https://startup-growth-simulator.streamlit.app";
@@ -182,22 +184,26 @@ export default function Page() {
             ────────────────────────────────────────────────────── */}
         <section id="explore" className="border-b border-rule bg-white">
           <div className="mx-auto max-w-6xl px-6 py-20 sm:px-10 sm:py-24">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">
-              The model
-            </p>
-            <h2 className="mt-5 max-w-3xl text-3xl font-semibold leading-tight tracking-tight text-ink sm:text-4xl">
-              A 4D ODE on Users, Active subscribers, Revenue, and Cash.
-            </h2>
-            <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted">
-              Logistic acquisition, conversion, churn, billing-cycle lag,
-              fixed and variable costs. Solved with five from-scratch ODE
-              methods (Euler, Heun, RK4, Adams-Bashforth-4, Adams-Moulton
-              predictor-corrector). Pick a profile to see the trajectory.
-            </p>
+            <Reveal>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">
+                The model
+              </p>
+              <h2 className="mt-5 max-w-3xl text-3xl font-semibold leading-tight tracking-tight text-ink sm:text-4xl">
+                A 4D ODE on Users, Active subscribers, Revenue, and Cash.
+              </h2>
+              <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted">
+                Logistic acquisition, conversion, churn, billing-cycle lag,
+                fixed and variable costs. Solved with five from-scratch ODE
+                methods (Euler, Heun, RK4, Adams-Bashforth-4, Adams-Moulton
+                predictor-corrector). Pick a profile to see the trajectory.
+              </p>
+            </Reveal>
 
-            <div className="mt-12">
-              <TrajectoryChart />
-            </div>
+            <Reveal delay={0.1}>
+              <div className="mt-12">
+                <TrajectoryChart />
+              </div>
+            </Reveal>
           </div>
         </section>
 
@@ -238,13 +244,15 @@ export default function Page() {
             ────────────────────────────────────────────────────── */}
         <section id="valley" className="border-b border-rule bg-white">
           <div className="mx-auto max-w-6xl px-6 py-20 sm:px-10 sm:py-24">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">
-              The result I'm proudest of
-            </p>
-            <h2 className="mt-5 max-w-4xl text-3xl font-semibold leading-tight tracking-tight text-ink sm:text-4xl lg:text-5xl">
-              A direction in parameter space the data can't distinguish — and
-              a proof the answer is robust to it.
-            </h2>
+            <Reveal>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">
+                The result I'm proudest of
+              </p>
+              <h2 className="mt-5 max-w-4xl text-3xl font-semibold leading-tight tracking-tight text-ink sm:text-4xl lg:text-5xl">
+                A direction in parameter space the data can't distinguish — and
+                a proof the answer is robust to it.
+              </h2>
+            </Reveal>
 
             <div className="mt-12 grid gap-10 lg:grid-cols-[3fr_2fr] lg:items-start lg:gap-16">
               <div>
@@ -279,27 +287,37 @@ export default function Page() {
             ────────────────────────────────────────────────────── */}
         <section id="answer" className="border-b border-rule bg-cream">
           <div className="mx-auto max-w-6xl px-6 py-20 sm:px-10 sm:py-24">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">
-              Drive the threshold
-            </p>
-            <h2 className="mt-5 max-w-4xl text-3xl font-semibold leading-tight tracking-tight text-ink sm:text-4xl lg:text-5xl">
-              Drag the churn rate. Watch the company live or die.
-            </h2>
-            <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted">
-              For each value of monthly churn, the cash balance at the end of
-              the 10-year horizon is precomputed from the 4D ODE. The dashed
-              line is the runway-survival threshold μ*: above it, every
-              parameter setting we tested ends with the company cash-negative.
-            </p>
+            <Reveal>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">
+                Drive the threshold
+              </p>
+              <h2 className="mt-5 max-w-4xl text-3xl font-semibold leading-tight tracking-tight text-ink sm:text-4xl lg:text-5xl">
+                Drag the churn rate. Watch the company live or die.
+              </h2>
+              <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted">
+                For each value of monthly churn, the cash balance at the end of
+                the 10-year horizon is precomputed from the 4D ODE. The dashed
+                line is the runway-survival threshold μ*: above it, every
+                parameter setting we tested ends with the company cash-negative.
+              </p>
+            </Reveal>
 
-            <div className="mt-12">
-              <MuStarSlider />
-            </div>
+            <Reveal delay={0.1}>
+              <div className="mt-12">
+                <MuStarSlider />
+              </div>
+            </Reveal>
           </div>
         </section>
 
         {/* ─────────────────────────────────────────────────────────
-            7. CONFIDENCE — MC posterior
+            7. VC INSIGHTS — dark navy band, the "stop and read" moment
+            after the marquee finding has just landed.
+            ────────────────────────────────────────────────────── */}
+        <VcInsights />
+
+        {/* ─────────────────────────────────────────────────────────
+            8. CONFIDENCE — MC posterior
             ────────────────────────────────────────────────────── */}
         <section id="confidence" className="border-b border-rule bg-white">
           <div className="mx-auto max-w-6xl px-6 py-20 sm:px-10 sm:py-24">
