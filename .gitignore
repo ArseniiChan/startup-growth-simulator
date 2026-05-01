@@ -235,3 +235,8 @@ next-env.d.ts
 
 # Compiled presentation artifact (regenerated from scripts/build_deck.js)
 report/presentation.pptx
+
+# Local working notes / AI-assistant scratchpads — never commit
+CLAUDE.md
+.aider*
+.cursor/

@@ -37,7 +37,7 @@ const INSIGHTS = [
 
 export function VcInsights() {
   return (
-    <section className="bg-ink text-white">
+    <section id="insights" className="scroll-mt-20 bg-ink text-white">
       <div className="mx-auto max-w-6xl px-6 py-20 sm:px-10 sm:py-24">
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
           What a VC would learn from this model
@@ -65,12 +65,29 @@ export function VcInsights() {
           ))}
         </ol>
 
-        <p className="mt-14 max-w-2xl border-t border-white/10 pt-8 text-xs leading-relaxed text-slate-400">
-          The default-SaaS profile is illustrative, not calibrated to a
-          specific company. The structural finding — that μ* is robust to
-          (g, μ_R) ambiguity — would survive recalibration to any specific
-          subscription business with comparable cost structure.
-        </p>
+        <div className="mt-14 max-w-3xl border-t border-white/10 pt-8">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+            About the data
+          </p>
+          <p className="mt-3 text-sm leading-relaxed text-slate-300">
+            The five archetype profiles above (High-ARPU SaaS, Horizontal
+            SaaS, Two-sided marketplace, Enterprise-cycle, Consumer
+            subscription) are{" "}
+            <span className="text-white">illustrative parameter sets</span>{" "}
+            chosen to span the realistic shape space of subscription
+            businesses. They are <span className="text-white">not</span>{" "}
+            calibrated to any specific company's financials. The 14.2%
+            headline is the bisection root of Cash(T=120) for the default-SaaS
+            archetype, computed by the from-scratch numerical pipeline.
+          </p>
+          <p className="mt-3 text-sm leading-relaxed text-slate-300">
+            The structural findings — that μ* exists, that it is robust to
+            calibration ambiguity (~2.4%), that the sensitivity ordering is
+            α &gt; μ_R &gt; g — survive any recalibration to a real subscription
+            business with comparable cost structure. The methodology is the
+            artifact, not the specific number.
+          </p>
+        </div>
       </div>
     </section>
   );

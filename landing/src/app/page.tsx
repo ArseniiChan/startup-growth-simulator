@@ -27,6 +27,7 @@ import { ValleyContour } from "@/components/ValleyContour";
 import { PosteriorHistogram } from "@/components/PosteriorHistogram";
 import { TornadoChart } from "@/components/TornadoChart";
 import { VcInsights } from "@/components/VcInsights";
+import { ShopifyAnchor } from "@/components/ShopifyAnchor";
 import { Reveal } from "@/components/Reveal";
 
 const REPO_URL = "https://github.com/ArseniiChan/startup-growth-simulator";
@@ -70,7 +71,7 @@ export default function Page() {
               Explore
             </a>
             <a
-              href="#answer"
+              href="#insights"
               className="hidden text-muted transition hover:text-ink sm:inline"
             >
               The answer
@@ -236,6 +237,39 @@ export default function Page() {
                 </p>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* ─────────────────────────────────────────────────────────
+            4.5. REAL-DATA ANCHOR — Shopify S-1 calibration.
+            Closes the gap on the synthetic-archetype story upstream:
+            "yes those were illustrative; here's the engine fit against
+            actual SEC numbers from a real public company."
+            ────────────────────────────────────────────────────── */}
+        <section id="anchor" className="scroll-mt-20 border-b border-rule bg-white">
+          <div className="mx-auto max-w-6xl px-6 py-20 sm:px-10 sm:py-24">
+            <Reveal>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">
+                Real-data anchor
+              </p>
+              <h2 className="mt-5 max-w-4xl text-3xl font-semibold leading-tight tracking-tight text-ink sm:text-4xl">
+                The same engine, fit to Shopify's pre-IPO revenue.
+              </h2>
+              <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted">
+                The archetype profiles upstream are illustrative parameter
+                sets. To close the loop, we ran the engine's Adam optimizer
+                against 9 quarters of Shopify Inc.'s S-1 quarterly revenue
+                (2012-Q4 through 2014-Q4, public SEC EDGAR data) — fitting
+                the growth rate, holding business-domain parameters at
+                public-data-informed anchors. Real numbers, real methodology.
+              </p>
+            </Reveal>
+
+            <Reveal delay={0.1}>
+              <div className="mt-12">
+                <ShopifyAnchor />
+              </div>
+            </Reveal>
           </div>
         </section>
 
