@@ -34,8 +34,9 @@ for the regimes we tested.)
 **1. The headline answer with a real confidence interval.** μ\* ≈ 14.2% per month,
 95% CI [8.0%, 16.0%], obtained by sampling the calibrated parameters from
 their posterior, solving the ODE for each sample, and bisecting on the
-terminal-cash sign change. Newton converges in 3 iterations, secant in 4,
-bisection in 20 — exactly the textbook ordering.
+terminal-cash sign change. On a representative break-even instance Newton
+converges in 4 iterations, secant in 7, bisection in 18 — the textbook
+ordering of quadratic > super-linear > linear convergence.
 
 **2. A structural-identifiability finding.** When I fit the model to noisy
 revenue data, two of its parameters — growth rate $g$ and the billing-cycle
@@ -51,9 +52,11 @@ robust to that ambiguity.** Documented in
 **Real-data anchor:** the engine's Adam optimizer was also fit against
 Shopify Inc.'s pre-IPO S-1 quarterly revenue (9 quarters, 2012-Q4 through
 2014-Q4, public SEC EDGAR data). Recovered growth rate `g = 13.5%/month`,
-converged in 242 iterations. The fitted RK4 trajectory tracks the observed
-S-1 quarterly points cleanly. Visible on the live landing page; the
-calibration script is [`scripts/precompute_landing_data.py`](scripts/precompute_landing_data.py).
+converged in 242 iterations. The fitted RK4 trajectory tracks the
+late-quarter trend (the early quarters underfit by ~1M USD, consistent
+with a 1-parameter fit on a more nuanced acquisition phase). Visible on
+the live landing page; the calibration script is
+[`scripts/precompute_landing_data.py`](scripts/precompute_landing_data.py).
 
 > ⚠ **One caveat in the headline number:** the 95% CI above propagates
 > uncertainty in $(g, \mu_R)$ only — the conversion rate $\alpha$ is
@@ -62,8 +65,8 @@ calibration script is [`scripts/precompute_landing_data.py`](scripts/precompute_
 > for $g$), the marginal CI under joint uncertainty is wider than the
 > conditional CI reported. A full joint posterior is deferred work.
 
-![convergence](report/figures/nb02_convergence.png)
-![valley](report/figures/nb03_loss_surface_2param.png)
+![convergence](landing/public/figures/convergence.png)
+![valley](landing/public/figures/valley.png)
 
 ## Two surfaces, two audiences
 
@@ -137,7 +140,12 @@ landing/                 Next.js 14 + Tailwind editorial landing page,
 scripts/
   precompute_landing_data.py    Regenerates the JSON datasets from engine/
                                 (also runs the Shopify S-1 calibration).
-  build_deck.js                 Presentation deck builder (in progress).
+  render_shopify_figure.py      Renders nb_shopify_fit.png and the
+                                presentation-quality loss-surface figure
+                                (pres_loss_surface.png) from the same JSON
+                                the Vercel landing consumes.
+  build_deck.js                 Presentation deck builder (pptxgenjs;
+                                produces report/presentation.pptx).
 
 tests/                   pytest. 114 tests. Validation-first: no engine
                          module is imported by a notebook until its tests

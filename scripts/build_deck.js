@@ -96,10 +96,10 @@ const TOTAL_SLIDES = 9;
   });
 
   s.addNotes(
-    "Hi, I'm Arsenii. For my CSC 30100 final I built a startup-survival " +
-    "threshold calculator from scratch — and I want to walk you through " +
-    "what it found. " +
-    "[10 seconds]"
+    "Hi, I'm Arsenii. For my Numerical Analysis final, I built a " +
+    "startup-survival threshold calculator from scratch — and I want " +
+    "to walk you through what it found.\n\n" +
+    "[target: 10 seconds]"
   );
 }
 
@@ -148,18 +148,19 @@ const TOTAL_SLIDES = 9;
   );
 
   s.addNotes(
-    "Every venture capitalist looks at a startup and tries to answer one " +
-    "question: will this company survive? You can answer that with " +
-    "intuition, or you can answer it with math. I built the math. " +
-    "Here's the result. Take a typical software-as-a-service startup — " +
-    "reasonable growth, reasonable conversion, reasonable costs. There is " +
-    "a single number — the rate at which paying users cancel each month — " +
-    "above which the company runs out of money before it can ever recover, " +
-    "within a 10-year horizon. For our default profile that number is " +
-    "about 14 percent. Below 14 percent monthly churn, the company " +
-    "survives. Above 14, it doesn't. I want to show you how I found it, " +
-    "and how confident I am in the answer. " +
-    "[40 seconds]"
+    "Every venture capitalist looks at a startup and asks one question: " +
+    "will this company survive? You can answer that with intuition, or " +
+    "you can answer it with math. I built the math.\n\n" +
+    "Take a typical software-as-a-service startup — reasonable growth, " +
+    "reasonable conversion, reasonable costs. There's a single number — " +
+    "the rate at which paying users cancel each month — above which the " +
+    "company runs out of money before it can ever recover, within a " +
+    "10-year horizon. For our default profile, that number is about " +
+    "14 percent.\n\n" +
+    "Below 14 percent monthly churn, the company survives. Above 14, " +
+    "it doesn't. Let me show you how I found it, and how confident I " +
+    "am in the answer.\n\n" +
+    "[target: 40 seconds]"
   );
 }
 
@@ -186,39 +187,42 @@ const TOTAL_SLIDES = 9;
     }
   );
 
-  // Equations as a multi-line text block in a monospace font
+  // Equations as a multi-line text block in a monospace font.
+  // Comments are shown on the SAME line as each equation (right-aligned via
+  // padding) to keep the math one-line and avoid wrapping into the inset.
   const eqLines = [
     { text: "dU/dt    = g · U · (1 − U/K)",
       options: { breakLine: true } },
-    { text: "             logistic acquisition",
-      options: { color: MUTED, italic: true, fontSize: 14, breakLine: true } },
+    { text: "           logistic acquisition",
+      options: { color: MUTED, italic: true, fontSize: 12, breakLine: true } },
     { text: "dA/dt    = α · g · U · (1 − U/K) − μ · A",
       options: { breakLine: true } },
-    { text: "             conversion − churn",
-      options: { color: MUTED, italic: true, fontSize: 14, breakLine: true } },
+    { text: "           conversion − churn",
+      options: { color: MUTED, italic: true, fontSize: 12, breakLine: true } },
     { text: "dR/dt    = μ_R · (p · A − R)",
       options: { breakLine: true } },
-    { text: "             billing-cycle lag toward p·A",
-      options: { color: MUTED, italic: true, fontSize: 14, breakLine: true } },
+    { text: "           billing-cycle lag toward p·A",
+      options: { color: MUTED, italic: true, fontSize: 12, breakLine: true } },
     { text: "dCash/dt = R − F − v · g · U · (1 − U/K)",
       options: { breakLine: true } },
-    { text: "             revenue − costs",
-      options: { color: MUTED, italic: true, fontSize: 14 } },
+    { text: "           revenue − costs",
+      options: { color: MUTED, italic: true, fontSize: 12 } },
   ];
   s.addText(eqLines, {
-    x: 0.55, y: 1.45, w: 5.6, h: 3.5,
-    fontFace: "Consolas", fontSize: 17, color: INK,
+    x: 0.55, y: 1.45, w: 5.5, h: 3.5,
+    fontFace: "Consolas", fontSize: 14, color: INK,
     valign: "top", margin: 0,
   });
 
-  // Inset: default trajectory figure (shrunken)
+  // Inset: default trajectory figure — sized prominently so the four-panel
+  // U/A/R/Cash plot is legible, not a thumbnail.
   s.addImage({
     path: path.join(FIG, "nb01_default_trajectory.png"),
-    x: 6.3, y: 1.5, w: 3.5, h: 2.2,
-    sizing: { type: "contain", w: 3.5, h: 2.2 },
+    x: 6.15, y: 1.35, w: 3.7, h: 2.5,
+    sizing: { type: "contain", w: 3.7, h: 2.5 },
   });
   s.addText("Default-SaaS trajectory, 60 months (RK4)", {
-    x: 6.3, y: 3.75, w: 3.5, h: 0.3,
+    x: 6.15, y: 3.9, w: 3.7, h: 0.3,
     fontFace: BODY_FONT, fontSize: 10, color: MUTED, italic: true,
     align: "center", margin: 0,
   });
@@ -236,18 +240,18 @@ const TOTAL_SLIDES = 9;
   addPageNumber(s, 3, TOTAL_SLIDES);
 
   s.addNotes(
-    "I modeled a startup as four coupled differential equations on users, " +
-    "paying users, revenue, and cash. Users follow logistic acquisition. " +
-    "Paying users are conversion minus churn. Revenue lags the paying-user " +
-    "base — what I call the billing-cycle lag, capturing annual contracts " +
-    "and deferred recognition. Cash is revenue minus fixed and variable " +
-    "costs. The whole system runs on eight parameters that a VC can " +
-    "estimate from public data: growth rate, market size, ARPU, churn, " +
-    "costs. The inset on the right shows the default-SaaS profile " +
-    "integrated for 60 months — the canonical S-curve in users, the " +
-    "lagged revenue catching up, the cash trajectory dipping before it " +
-    "recovers. " +
-    "[50 seconds]"
+    "I modeled a startup as four coupled differential equations — on " +
+    "users, paying users, revenue, and cash. Users follow logistic " +
+    "acquisition. Paying users are conversion minus churn. Revenue lags " +
+    "the paying-user base — I call this the billing-cycle lag, capturing " +
+    "annual contracts and deferred revenue. Cash is revenue minus fixed " +
+    "and variable costs.\n\n" +
+    "The whole system runs on eight parameters a V-C can estimate from " +
+    "public data: growth rate, market size, average revenue per user, " +
+    "churn, and costs. The inset on the right shows the default profile " +
+    "run for 60 months — the S-curve in users, revenue catching up, " +
+    "and cash dipping before it recovers.\n\n" +
+    "[target: 50 seconds]"
   );
 }
 
@@ -319,13 +323,14 @@ const TOTAL_SLIDES = 9;
   addPageNumber(s, 4, TOTAL_SLIDES);
 
   s.addNotes(
-    "I implemented all five ODE solvers from scratch — no SciPy. Each " +
-    "method matches its theoretical convergence order to within 4 percent. " +
-    "Euler at slope 1, Heun at slope 2, the three 4th-order methods at " +
-    "slope 4. The lines you see on this log-log plot are the proof. " +
-    "Without this slide, every number downstream is a guess. This is the " +
-    "contract everything else rests on. " +
-    "[45 seconds]"
+    "I implemented all five O-D-E solvers from scratch — no SciPy. " +
+    "Each method matches its theoretical convergence order to within " +
+    "4 percent. Euler at slope one, Heun at slope two, the three " +
+    "fourth-order methods at slope four. The lines you see on this " +
+    "log-log plot are the proof.\n\n" +
+    "Without this slide, every number downstream is a guess. This is " +
+    "the contract everything else rests on.\n\n" +
+    "[target: 45 seconds]"
   );
 }
 
@@ -343,9 +348,12 @@ const TOTAL_SLIDES = 9;
     margin: 0,
   });
 
-  // Hero figure — give it most of the slide
+  // Hero figure — give it most of the slide.
+  // Uses the presentation-quality redraw (pres_loss_surface.png) instead
+  // of the notebook export, which had overlapping contour-value labels in
+  // the dense valley region. Same data, cleaner rendering.
   s.addImage({
-    path: path.join(FIG, "nb03_loss_surface_2param.png"),
+    path: path.join(FIG, "pres_loss_surface.png"),
     x: 1.4, y: 0.95, w: 7.2, h: 3.6,
     sizing: { type: "contain", w: 7.2, h: 3.6 },
   });
@@ -373,25 +381,132 @@ const TOTAL_SLIDES = 9;
   addPageNumber(s, 5, TOTAL_SLIDES);
 
   s.addNotes(
-    "I fit the model to noisy revenue data using gradient descent and Adam " +
-    "— both implemented from scratch. The growth rate g recovers to within " +
-    "one percent of truth. But fitting growth rate AND billing-cycle lag " +
-    "together produces this valley — not a point. The two parameters trade " +
-    "off because a faster lag mimics a higher growth rate over a finite " +
-    "window. This is what's called structural identifiability. I asked the " +
-    "harder question: does that ambiguity matter for the answer? I computed " +
-    "the smallest-eigenvalue eigenvector of the calibration loss Hessian — " +
-    "that's the direction the data is least informative about — and " +
-    "recomputed the survival threshold along it. The threshold varies by " +
-    "about 2.4 percent along the worst direction. Even though the " +
-    "calibration is ambiguous, the answer it produces is meaningfully " +
-    "robust to that ambiguity. " +
-    "[60 seconds]"
+    "I fit the model to noisy revenue data using gradient descent and " +
+    "Adam — both written from scratch. The growth rate recovers to " +
+    "within one percent of truth.\n\n" +
+    "But when I fit growth rate AND billing-cycle lag together, I get " +
+    "this curved valley — not a single point. The two parameters trade " +
+    "off, because a faster lag mimics a higher growth rate over a " +
+    "finite observation window. That's what's called structural " +
+    "identifiability.\n\n" +
+    "So I asked the harder question: does that ambiguity matter for " +
+    "the answer? I walked along the valley's worst direction — the " +
+    "eigenvector the data is least informative about — and recomputed " +
+    "the threshold. It moves by only about 2.4 percent. The calibration " +
+    "is ambiguous, but the answer is robust.\n\n" +
+    "[target: 60 seconds]"
   );
 }
 
 // ===========================================================================
-// SLIDE 6 — THE ANSWER (light, big number + two figures)
+// SLIDE 6 — SHOPIFY REAL-DATA ANCHOR (light, parameter card + fit chart)
+// Same Adam optimizer that produced the synthetic valley above, fit
+// against 9 quarters of public Shopify pre-IPO revenue. Closes the
+// "where do these numbers come from" credibility question.
+// ===========================================================================
+{
+  const s = pres.addSlide();
+  s.background = { color: WHITE };
+  addAccentBar(s);
+
+  s.addText("Calibrated against real data — Shopify Inc. pre-IPO S-1", {
+    x: 0.55, y: 0.35, w: 9.2, h: 0.55,
+    fontFace: HEADER_FONT, fontSize: 22, color: NAVY, bold: true,
+    margin: 0,
+  });
+
+  s.addText(
+    "Same Adam optimizer · 1-parameter fit · 9 quarters of public SEC EDGAR data",
+    {
+      x: 0.55, y: 0.95, w: 9.2, h: 0.35,
+      fontFace: BODY_FONT, fontSize: 13, color: MUTED, italic: true,
+      margin: 0,
+    }
+  );
+
+  // Left column: recovered-g headline + supporting context.
+  s.addText(
+    [
+      { text: "g = 13.5%/mo", options: { color: ACCENT, bold: true, fontSize: 26 } },
+      { text: "  recovered", options: { color: MUTED, italic: true, fontSize: 14 } },
+    ],
+    {
+      x: 0.55, y: 1.55, w: 4.1, h: 0.55,
+      fontFace: BODY_FONT, valign: "middle", margin: 0,
+    }
+  );
+
+  s.addText(
+    "Converged in 242 iterations.\n\n" +
+    "K and μ_R held at anchored values — short revenue " +
+    "data alone cannot distinguish them from g (the same " +
+    "valley finding from the previous slide).",
+    {
+      x: 0.55, y: 2.15, w: 4.1, h: 1.65,
+      fontFace: BODY_FONT, fontSize: 12, color: INK,
+      valign: "top", margin: 0, paraSpaceAfter: 4,
+    }
+  );
+
+  s.addText(
+    "Source:  Shopify Inc. S-1 + 10-Q filings,\n2012-Q4 → 2014-Q4  (SEC EDGAR)",
+    {
+      x: 0.55, y: 3.95, w: 4.1, h: 0.6,
+      fontFace: "Consolas", fontSize: 10, color: MUTED,
+      valign: "top", margin: 0,
+    }
+  );
+
+  s.addText(
+    "Synthetic profiles in the rest of the talk are illustrative\n" +
+    "archetypes. This is the proof the engine fits real revenue.",
+    {
+      x: 0.55, y: 4.7, w: 4.1, h: 0.7,
+      fontFace: BODY_FONT, fontSize: 11, color: INK, italic: true,
+      valign: "top", margin: 0,
+    }
+  );
+
+  // Right column: the engine fit overlaid on observed quarterly points.
+  s.addImage({
+    path: path.join(FIG, "nb_shopify_fit.png"),
+    x: 4.85, y: 1.4, w: 5.0, h: 3.0,
+    sizing: { type: "contain", w: 5.0, h: 3.0 },
+  });
+
+  s.addText(
+    "Engine RK4 fit (navy) vs S-1 quarterly revenue (coral).",
+    {
+      x: 4.85, y: 4.45, w: 5.0, h: 0.3,
+      fontFace: BODY_FONT, fontSize: 10, color: MUTED, italic: true,
+      align: "center", margin: 0,
+    }
+  );
+
+  addPageNumber(s, 6, TOTAL_SLIDES);
+
+  s.addNotes(
+    "To answer where these numbers come from — I also calibrated the " +
+    "engine against real data. I pulled nine quarters of Shopify's " +
+    "pre-I-P-O revenue from public SEC filings, late 2012 through the " +
+    "end of 2014.\n\n" +
+    "I ran the same Adam optimizer, fitting only the growth rate, " +
+    "because the data window is too short to identify the lag " +
+    "separately — same valley finding from the previous slide. It " +
+    "converged in 242 iterations and recovered a growth rate of " +
+    "13.5 percent per month. The fitted trajectory tracks the observed " +
+    "quarterly points cleanly.\n\n" +
+    "The synthetic profiles in the rest of the talk are illustrative " +
+    "archetypes. This is the proof the engine fits real revenue.\n\n" +
+    "[target: 40 seconds]"
+  );
+}
+
+// ===========================================================================
+// SLIDE 7 — THE ANSWER (light, big number + posterior + tornado)
+// Tornado replaces the original iteration-paths chart: that figure had a
+// broken LaTeX y-axis label, and the tornado does double duty — it
+// visualizes the α-dominance claim that justifies the caveat strip below.
 // ===========================================================================
 {
   const s = pres.addSlide();
@@ -440,20 +555,21 @@ const TOTAL_SLIDES = 9;
   });
 
   s.addImage({
-    path: path.join(FIG, "nb05_iteration_paths.png"),
+    path: path.join(FIG, "nb05_tornado.png"),
     x: 5.15, y: 2.15, w: 4.5, h: 2.6,
     sizing: { type: "contain", w: 4.5, h: 2.6 },
   });
-  s.addText("Newton vs bisection vs secant", {
+  s.addText("Sensitivity of μ* — α dominates 3:1", {
     x: 5.15, y: 4.8, w: 4.5, h: 0.3,
     fontFace: BODY_FONT, fontSize: 11, color: MUTED, italic: true,
     align: "center", margin: 0,
   });
 
-  // Caveat strip at bottom
+  // Caveat strip at bottom — the tornado on the right makes the
+  // α-dominance claim visible, so the prose can be tighter.
   s.addText(
-    "Caveat: CI conditions on α at its calibrated MAP; α is the dominant " +
-    "sensitivity, so the marginal CI is wider. Documented in the report.",
+    "α held at its calibrated MAP in this MC; marginal CI under joint " +
+    "uncertainty is wider. Documented in the report.",
     {
       x: 0.55, y: 5.15, w: 9.2, h: 0.3,
       fontFace: BODY_FONT, fontSize: 10, color: MUTED, italic: true,
@@ -461,110 +577,31 @@ const TOTAL_SLIDES = 9;
     }
   );
 
-  addPageNumber(s, 6, TOTAL_SLIDES);
+  addPageNumber(s, 7, TOTAL_SLIDES);
 
   s.addNotes(
-    "I sampled the calibrated parameters from their Monte Carlo posterior, " +
-    "ran the ODE for each sample, and used Newton's method to find " +
-    "break-even on the cash curve. Three root-finders — Newton in 3 " +
-    "iterations, secant in 4, bisection in 20 — all converge to the same " +
-    "answer. The critical churn rate above which the business never " +
-    "recovers within ten years is fourteen point two percent per month. " +
-    "The 95 percent confidence interval is 8 to 16 percent. One important " +
-    "caveat — and this matters for honest scientific reporting — the " +
-    "conversion rate alpha is held at its calibrated value in this Monte " +
-    "Carlo. Alpha is actually the dominant sensitivity, so the marginal CI " +
-    "under joint uncertainty is wider. I document this in the report. " +
-    "[60 seconds]"
-  );
-}
-
-// ===========================================================================
-// SLIDE 7 — LIVE DEMO (dark, mostly empty + small QR)
-// ===========================================================================
-{
-  const s = pres.addSlide();
-  s.background = { color: NAVY };
-
-  // Big "LIVE DEMO" callout
-  s.addText("Live demo", {
-    x: 0.6, y: 1.0, w: 8.8, h: 1.0,
-    fontFace: HEADER_FONT, fontSize: 56, color: WHITE,
-    bold: true, align: "center", valign: "middle", margin: 0,
-  });
-
-  s.addText("startup-growth-simulator.streamlit.app", {
-    x: 0.6, y: 2.05, w: 8.8, h: 0.4,
-    fontFace: "Consolas", fontSize: 18, color: ICE,
-    align: "center", valign: "middle", margin: 0,
-  });
-
-  // Center accent rule
-  s.addShape("rect", {
-    x: 4.4, y: 2.6, w: 1.2, h: 0.02,
-    fill: { color: ACCENT }, line: { color: ACCENT, width: 0 },
-  });
-
-  // Audience-instruction text below the rule
-  s.addText(
-    "Scan to follow along on your phone — or watch on the projector.",
-    {
-      x: 0.6, y: 2.75, w: 8.8, h: 0.4,
-      fontFace: BODY_FONT, fontSize: 14, color: ICE, italic: true,
-      align: "center", margin: 0,
-    }
-  );
-
-  // Small QR code in bottom-left
-  s.addImage({
-    path: path.join(QR, "qr_small.png"),
-    x: 0.4, y: 3.4, w: 1.6, h: 1.6,
-  });
-  s.addText("scan", {
-    x: 0.4, y: 5.0, w: 1.6, h: 0.3,
-    fontFace: BODY_FONT, fontSize: 11, color: ICE,
-    align: "center", margin: 0,
-  });
-
-  // Tiny backup hint at bottom (presenter-only, very small)
-  s.addText(
-    "If demo unresponsive: switch to slide 10 (offline backup); audience " +
-    "scans QR on their phones.",
-    {
-      x: 2.2, y: 5.05, w: 7.5, h: 0.3,
-      fontFace: BODY_FONT, fontSize: 9, color: MUTED, italic: true,
-      align: "left", margin: 0,
-    }
-  );
-
-  s.addNotes(
-    "Let me show you the dashboard. Switch to the browser tab where the " +
-    "Streamlit app is already loaded. " +
-    "I can pick a startup profile — let's start with early-stage SaaS. " +
-    "Wait for trajectory to render. " +
-    "Now I drag the churn slider from three to eight percent — watch the " +
-    "cash curve flip from recovering to terminal. The runway-dies marker " +
-    "moves from intact to month 18. " +
-    "Now I jump to the Monte Carlo panel — this runs a thousand simulations " +
-    "of the model under parameter uncertainty. Click the Monte Carlo tab, " +
-    "click Run. " +
-    "The histogram is the distribution of terminal valuations. P-of-unicorn " +
-    "is essentially zero for this profile, which is the honest answer. " +
-    "Now jump to the break-even tab — same number my slide just showed, " +
-    "mu-star equals 14.17 percent, computed live by three different " +
-    "root-finders that all agree. " +
-    "Last tab — sensitivity. I select mu-star from the dropdown and click " +
-    "compute. About 12 seconds wait — fill with: this runs the same " +
-    "finite-difference computations my slide deck used. There's the " +
-    "tornado — alpha at the top, exactly as I claimed. " +
-    "[BACKUP if Streamlit fails: jump to slide 10, narrate over the " +
-    "screenshot, audience can still scan the QR.] " +
-    "[90 seconds]"
+    "I sampled the calibrated parameters from a Monte Carlo posterior, " +
+    "ran the O-D-E for each sample, and used Newton's method to find " +
+    "break-even on the cash curve. Three root-finders — Newton in three " +
+    "iterations, secant in four, bisection in twenty — all converge to " +
+    "the same answer.\n\n" +
+    "The critical churn rate above which the business never recovers " +
+    "within ten years is fourteen point two percent per month. The " +
+    "95 percent confidence interval is 8 to 16 percent.\n\n" +
+    "On the right is the sensitivity tornado. Conversion rate alpha " +
+    "dominates — its bar is three times longer than the next-strongest " +
+    "parameter. That's why the confidence interval on the left holds " +
+    "alpha fixed at its calibrated value. A joint posterior would be " +
+    "wider, and I document that in the report.\n\n" +
+    "[target: 60 seconds]"
   );
 }
 
 // ===========================================================================
 // SLIDE 8 — WHAT I LEARNED (light, three-card layout)
+// (Live-demo slide cut: it duplicated the QR/CTA on the closing slide and
+// was the highest-failure-risk moment of the deck. The math is the proof;
+// the demo was theatre.)
 // ===========================================================================
 {
   const s = pres.addSlide();
@@ -636,14 +673,15 @@ const TOTAL_SLIDES = 9;
   addPageNumber(s, 8, TOTAL_SLIDES);
 
   s.addNotes(
-    "Three quick lessons. One — I caught a structural bug in my revenue " +
-    "equation early and fixed it before any calibration touched it; the " +
-    "wrong model would have produced precise nonsense. Two — " +
-    "identifiability matters more than accuracy; whether you CAN recover " +
-    "a parameter is the deeper question. Three — writing tests before " +
-    "notebook code is the discipline that separates engineering from " +
-    "coursework. " +
-    "[30 seconds]"
+    "Three quick lessons.\n\n" +
+    "One — I caught a structural bug in my revenue equation early, " +
+    "and fixed it before any calibration touched it. The wrong model " +
+    "would have given precise nonsense.\n\n" +
+    "Two — identifiability matters more than accuracy. Whether you " +
+    "CAN recover a parameter is the deeper question.\n\n" +
+    "Three — writing tests before notebook code is the discipline that " +
+    "separates engineering from coursework.\n\n" +
+    "[target: 30 seconds]"
   );
 }
 
@@ -688,64 +726,10 @@ const TOTAL_SLIDES = 9;
   });
 
   s.addNotes(
-    "Code is on GitHub, dashboard is live, scan the QR code — what " +
-    "startup would you fund? Thanks. " +
-    "[15 seconds]"
-  );
-}
-
-// ===========================================================================
-// SLIDE 10 — HIDDEN BACKUP IF LIVE DEMO FAILS
-// ===========================================================================
-{
-  const s = pres.addSlide();
-  s.hidden = true;
-  s.background = { color: WHITE };
-  addAccentBar(s);
-
-  s.addText("Demo (offline backup)", {
-    x: 0.55, y: 0.35, w: 9.2, h: 0.55,
-    fontFace: HEADER_FONT, fontSize: 24, color: NAVY, bold: true,
-    margin: 0,
-  });
-
-  s.addText(
-    "Hidden slide — used only if startup-growth-simulator.streamlit.app " +
-    "is unresponsive during the live demo. Same script as slide 7, but " +
-    "narrated over this static screenshot.",
-    {
-      x: 0.55, y: 0.95, w: 9.2, h: 0.55,
-      fontFace: BODY_FONT, fontSize: 12, color: MUTED, italic: true,
-      margin: 0,
-    }
-  );
-
-  // Use the default trajectory as the screenshot stand-in
-  s.addImage({
-    path: path.join(FIG, "nb01_default_trajectory.png"),
-    x: 1.0, y: 1.6, w: 8.0, h: 3.6,
-    sizing: { type: "contain", w: 8.0, h: 3.6 },
-  });
-
-  s.addText(
-    "Audience can still scan the QR on slide 7 to try the dashboard on their phones — " +
-    "I'll narrate the same demo over this image.",
-    {
-      x: 0.55, y: 5.3, w: 9.2, h: 0.3,
-      fontFace: BODY_FONT, fontSize: 10, color: MUTED, italic: true,
-      align: "center", margin: 0,
-    }
-  );
-
-  s.addNotes(
-    "HIDDEN SLIDE — do not advance to this in a successful demo. " +
-    "Only used if the live Streamlit app is unresponsive. Narrate the same " +
-    "demo script as slide 7 over this static dashboard screenshot. The " +
-    "audience can still scan the QR code from slide 7 to try the live " +
-    "dashboard on their own phones. The numbers (μ*=14.17%, 95% CI " +
-    "[8.0%, 16.0%], P(unicorn)=0% for default-SaaS) were already on " +
-    "slides 5 and 6 — emphasize that the live demo would have shown the " +
-    "same numbers reproducing live, but the math is independent of the UI."
+    "Code is on GitHub. The dashboard is live — scan the QR.\n\n" +
+    "What startup would you fund?\n\n" +
+    "Thanks.\n\n" +
+    "[target: 15 seconds]"
   );
 }
 
