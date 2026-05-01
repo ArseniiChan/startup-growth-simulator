@@ -108,9 +108,20 @@ export function TrajectoryChart() {
         ))}
       </div>
       {/* Subtitle for active profile — gives the chip a one-line caption
-          that lands the company-shape interpretation for a VC reader. */}
-      <p className="mb-8 font-mono text-xs text-muted">
+          that lands the architecture-shape interpretation for a reader. */}
+      <p className="mb-2 font-mono text-xs text-muted">
         <span className="text-ink">▸</span> {activeProfile?.subtitle ?? ""}
+      </p>
+      {/* Synthetic-data disclosure — surfaces within the first interactive
+          section so a reader doesn't reach the navy-band caveat without
+          knowing the parameter sets are illustrative. */}
+      <p className="mb-8 text-[11px] leading-relaxed text-muted">
+        Each archetype is an illustrative parameter set, not a calibration
+        to a specific company. See{" "}
+        <a href="#insights" className="underline decoration-rule underline-offset-2 transition hover:text-ink hover:decoration-ink">
+          About the data
+        </a>{" "}
+        for the methodology disclosure.
       </p>
 
       {/* Headline metrics for the active profile */}

@@ -1,0 +1,19 @@
+{
+  "company": "Shopify Inc.",
+  "ticker": "SHOP",
+  "ipo_date": "2015-05-21",
+  "source": "Shopify S-1 (Form F-1) filed April 2015 + subsequent 10-Q amendments. Public SEC EDGAR data.",
+  "metric": "quarterly_revenue_thousands_usd",
+  "note": "9 quarters from 2012-Q4 to 2014-Q4. Pre-IPO trajectory used for calibrating the engine's (g, K, mu_R) parameters against real-company revenue growth.",
+  "data": [
+    { "quarter": "2012-Q4", "month_index": 0,  "revenue_thousands": 7638  },
+    { "quarter": "2013-Q1", "month_index": 3,  "revenue_thousands": 9121  },
+    { "quarter": "2013-Q2", "month_index": 6,  "revenue_thousands": 11116 },
+    { "quarter": "2013-Q3", "month_index": 9,  "revenue_thousands": 13703 },
+    { "quarter": "2013-Q4", "month_index": 12, "revenue_thousands": 16331 },
+    { "quarter": "2014-Q1", "month_index": 15, "revenue_thousands": 19389 },
+    { "quarter": "2014-Q2", "month_index": 18, "revenue_thousands": 23667 },
+    { "quarter": "2014-Q3", "month_index": 21, "revenue_thousands": 28712 },
+    { "quarter": "2014-Q4", "month_index": 24, "revenue_thousands": 33202 }
+  ]
+}

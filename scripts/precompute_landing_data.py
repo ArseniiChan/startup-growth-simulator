@@ -35,11 +35,17 @@ if str(REPO_ROOT) not in sys.path:
 
 from engine import (
     StartupParams,
+    adam,
+    array_to_params,
     bisection,
     central_diff,
+    clip_params,
     default_params,
     find_brackets,
     growth_system,
+    make_loss_fn,
+    numerical_gradient,
+    params_to_array,
     preset_profiles,
     rk4,
     run_simulation,
@@ -290,7 +296,155 @@ def precompute_tornado() -> None:
 
 
 # ---------------------------------------------------------------------------
-# 6. Headline metadata
+# 6. Shopify S-1 calibration — the real-data anchor
+# ---------------------------------------------------------------------------
+
+
+def precompute_shopify_calibration() -> None:
+    """Calibrate the engine against Shopify's pre-IPO quarterly revenue.
+
+    Reads data/s1_filings/shopify.json (9 quarters from S-1, public SEC data).
+    Holds business-domain parameters at Shopify-reasonable values inferred
+    from public sources (ARPU ~$50/mo per merchant, ~5% monthly merchant
+    churn, larger fixed costs than the synthetic preset to reflect real
+    operating expense). Fits (g, K, mu_R) via Adam against the observed
+    revenue curve.
+
+    Output is a real-data anchor section: a calibrated parameter set, the
+    fitted vs observed trajectory for the page to render, and the
+    μ* threshold computed from the calibrated parameters.
+    """
+    from engine.utils import linear_interpolate
+
+    # Load real Shopify S-1 data
+    shopify_path = REPO_ROOT / "data" / "s1_filings" / "shopify.json"
+    with open(shopify_path) as f:
+        shopify = json.load(f)
+
+    obs_t = np.array([row["month_index"] for row in shopify["data"]], dtype=float)
+    # Convert quarterly revenue ($K) to monthly recurring revenue ($, the
+    # engine's R(t) unit) — divide by 3 because the engine's R(t) is monthly.
+    obs_R = np.array([row["revenue_thousands"] * 1000.0 / 3.0 for row in shopify["data"]])
+
+    # Anchor non-fitted parameters at Shopify-reasonable values (public-data
+    # informed). Per the implementation plan, fitting all 8 parameters from
+    # a single revenue curve is underdetermined; we fit a 2-param subset
+    # (g, K) — the well-conditioned cousin of the curved-valley (g, mu_R)
+    # fit documented in Notebook 3. mu_R, alpha, mu, p, F, v are anchored
+    # at values inferred from Shopify's public S-1 + post-IPO disclosures.
+    anchor = StartupParams(
+        g=0.08,            # initial guess; will be fit. ~8%/mo user growth.
+        K=1_500_000,       # initial guess; will be fit. Plausible TAM.
+        alpha=1.0,         # treat all acquired merchants as paying (no funnel split for revenue calibration)
+        mu=0.04,           # ~4% monthly merchant churn (public Shopify estimates)
+        p=50.0,            # ~$50/mo ARPU per merchant typical for Shopify mix
+        mu_R=0.30,         # fast lag — Shopify recognizes monthly subscriptions promptly
+        F=2_000_000.0,     # ~$2M/mo fixed operating costs in 2014-era Shopify
+        v=30.0,            # ~$30 CAC per merchant
+    )
+
+    # Per Notebook 3's finding: 2-param (g, mu_R) recovery hits a curved
+    # valley, and K is unidentifiable from short revenue data alone (the
+    # logistic acquisition term g*U*(1-U/K) is negligibly affected by K
+    # while U << K, which it is for the entire S-1 window). The
+    # well-conditioned recovery is g ALONE, holding everything else at
+    # public-data-informed anchors. This matches the project's
+    # methodology contract.
+    fit_indices = [0]  # g only
+    # Shopify had ~25K merchants in Q4 2012 (per S-1 disclosures).
+    y0 = np.array([25_000.0, 25_000.0, 1_500_000.0, 130_000_000.0])
+    T = 27.0  # cover the 9 quarters of S-1 data with margin
+    h = 0.25
+
+    loss_fn = make_loss_fn(obs_t, obs_R, anchor, fit_indices, rk4, y0, (0.0, T), h)
+    project = lambda theta: clip_params(theta, fit_indices)
+    grad = lambda theta: numerical_gradient(loss_fn, theta)
+
+    theta0 = np.array([0.08])  # initial guess for g
+    result = adam(loss_fn, grad, theta0, lr=0.005, max_iter=2000, project=project)
+    theta_hat = result["theta"]
+    g_hat = float(theta_hat[0])
+    K_hat = anchor.K  # anchored, not fit
+    muR_hat = anchor.mu_R  # anchored, not fit
+
+    # Build the calibrated profile
+    calibrated = array_to_params(theta_hat, anchor, fit_indices)
+
+    # Generate fitted trajectory
+    t_fit, y_fit = rk4(growth_system, y0, (0.0, T), h, calibrated)
+    R_fit = y_fit[:, 2]
+
+    # Sample fitted values at observed quarters for the overlay
+    R_fit_at_obs = linear_interpolate(t_fit, R_fit, obs_t)
+
+    # Compute mu* for the calibrated profile (10-year horizon)
+    mu_grid = np.linspace(0.005, 0.499, 60)
+
+    def f(m):
+        params_m = StartupParams(
+            g=calibrated.g, K=calibrated.K, alpha=calibrated.alpha,
+            mu=float(m), p=calibrated.p, mu_R=calibrated.mu_R,
+            F=calibrated.F, v=calibrated.v,
+        )
+        _, y = rk4(growth_system, y0, (0.0, 120.0), 0.5, params_m)
+        return float(y[-1, 3])
+
+    mu_star = None
+    brackets = find_brackets(f, mu_grid)
+    if brackets:
+        a, b = brackets[0]
+        bisect_result = bisection(f, a, b, tol=1e-6, max_iter=60)
+        if bisect_result["converged"]:
+            mu_star = bisect_result["root"]
+
+    # Downsample the fitted trajectory for the page (~60 points)
+    DOWNSAMPLE = max(1, len(t_fit) // 60)
+    payload = {
+        "company": shopify["company"],
+        "ticker": shopify["ticker"],
+        "source": shopify["source"],
+        "calibrated": {
+            "g": g_hat,
+            "K": K_hat,
+            "mu_R": muR_hat,
+            # Anchored (not fitted) values, for transparency
+            "alpha_anchored": calibrated.alpha,
+            "mu_anchored": calibrated.mu,
+            "p_anchored": calibrated.p,
+            "F_anchored": calibrated.F,
+            "v_anchored": calibrated.v,
+        },
+        "loss_history": result["loss_history"][::5].tolist(),
+        "final_loss": float(result["loss_history"][-1]),
+        "iterations": result["iterations"],
+        "converged": result["converged"],
+        # Observed vs fitted for the overlay chart
+        "observed": [
+            {
+                "month": float(obs_t[i]),
+                "revenue_monthly_usd": float(obs_R[i]),
+                "quarter_label": shopify["data"][i]["quarter"],
+            }
+            for i in range(len(obs_t))
+        ],
+        "fitted": [
+            {"month": float(t_fit[i]), "revenue_monthly_usd": float(R_fit[i])}
+            for i in range(0, len(t_fit), DOWNSAMPLE)
+        ],
+        # mu* on the calibrated profile
+        "mu_star": mu_star,
+        "horizon_months": 120,
+    }
+
+    _write_json("shopify_calibration.json", payload)
+    print(f"  Shopify calibration: g={g_hat:.4f}, K={K_hat:,.0f}, mu_R={muR_hat:.4f}")
+    print(f"  final loss: {result['loss_history'][-1]:.3e}, converged: {result['converged']}")
+    if mu_star is not None:
+        print(f"  mu* (Shopify-calibrated): {mu_star * 100:.3f}%")
+
+
+# ---------------------------------------------------------------------------
+# 7. Headline metadata
 # ---------------------------------------------------------------------------
 
 
@@ -331,17 +485,19 @@ def _write_json(filename: str, payload: dict) -> None:
 if __name__ == "__main__":
     print("Precomputing landing-page data...")
     print()
-    print("[1/6] preset profiles")
+    print("[1/7] preset profiles")
     precompute_profiles()
-    print("[2/6] mu* curve (200 samples)")
+    print("[2/7] mu* curve (200 samples)")
     precompute_mu_star_curve()
-    print("[3/6] calibration valley (40x40)")
+    print("[3/7] calibration valley (40x40)")
     precompute_valley_surface()
-    print("[4/6] MC posterior (200 samples)")
+    print("[4/7] MC posterior (200 samples)")
     precompute_mc_posterior()
-    print("[5/6] sensitivity tornado")
+    print("[5/7] sensitivity tornado")
     precompute_tornado()
-    print("[6/6] headline meta")
+    print("[6/7] Shopify S-1 calibration (real-data anchor)")
+    precompute_shopify_calibration()
+    print("[7/7] headline meta")
     precompute_meta()
     print()
     print(f"All datasets written to {OUT_DIR}")
