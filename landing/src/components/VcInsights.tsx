@@ -7,7 +7,7 @@
  * — and the band answers in their language.
  *
  * Three numbered takeaways, intentionally written in VC vocabulary
- * (kill threshold, calibration uncertainty, defensible-CI). The band
+ * (boundary, calibration uncertainty, defensible-CI). The band
  * inverts the page's normal palette (navy bg, white type, slate-300
  * for muted) which gives it visual weight as a "stop and read" moment.
  */
@@ -17,21 +17,21 @@ const ACCENT = "#F87171"; // softer accent on dark — pure red-600 reads too ho
 const INSIGHTS = [
   {
     n: "01",
-    headline: "Churn dominates growth in survival math.",
+    headline: "Retention dominates growth in survival math.",
     body:
-      "Conversion rate α and billing-cycle lag μ_R move the kill threshold roughly 6× more than growth rate g. The VC instinct that 'retention matters more than acquisition' has a closed-form math version, and it's bigger than most people think.",
+      "On the sensitivity tornado, conversion rate α moves the boundary ~6× more than growth rate g; billing-cycle lag μ_R moves it ~2× more than g. The VC instinct that retention matters more than acquisition has a closed-form math version — and the multiple is sharper than most people guess.",
   },
   {
     n: "02",
-    headline: "Calibration uncertainty barely shifts the answer.",
+    headline: "Calibration ambiguity barely shifts the answer.",
     body:
-      "When (g, μ_R) can't be separately identified from data — a curved valley in parameter space — the threshold μ* still varies by only ~2.4% along the worst direction. The answer is robust to the calibration ambiguity that breaks most quant models.",
+      "When (g, μ_R) can't be separately identified from data — a curved valley in parameter space — the boundary μ* still varies by only ~2.4% along the worst direction. Caveat: this is the conditional CI, holding α at its calibrated MAP. The marginal CI under joint (α, g, μ_R) uncertainty is wider; full joint posterior is deferred work.",
   },
   {
     n: "03",
-    headline: "Most live SaaS companies aren't even close to the cliff.",
+    headline: "The boundary exists, and a bad quarter walks you toward it.",
     body:
-      "Default-SaaS profiles sit around μ ≈ 3% monthly churn — about 11 percentage points below the 14.2% kill threshold. Companies that die already know they're dying. The model's job is to tell you how much daylight a healthy company actually has.",
+      "Default profiles sit around μ ≈ 3% monthly churn — well below the 14.2% non-viability boundary. But every company within ~5pp of the boundary is one cohort retention shock away from non-recovery. The model's job isn't to say 'companies are safe' — it's to draw the line and quantify the daylight.",
   },
 ];
 
