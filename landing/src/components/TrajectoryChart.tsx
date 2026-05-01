@@ -40,18 +40,20 @@ interface ProfilesPayload {
   [key: string]: ProfileData;
 }
 
-// Profile chip labels are deliberately written in the audience's
-// vocabulary — a VC recruiter reads "Stripe-like SaaS" and instantly
-// pattern-matches to a known company shape. The underlying data
-// (default-saas / saas / marketplace / enterprise / viral) is the
-// generic synthetic profile from the engine's preset_profiles().
-// The brand names are illustrative shapes, not real-company calibrations.
+// Profile chip labels are written as architecture archetypes, not
+// brand names — earlier versions used "Stripe-like / TikTok-like"
+// which fails the diligence test (Stripe is take-rate-on-GMV not
+// per-seat ARPU; TikTok is ad-supported consumer, not a subscription
+// SaaS at all). Archetype labels keep the recognition affordance
+// without making claims about specific companies' financials.
+//
+// Underlying data is the engine's generic preset_profiles().
 const PROFILES: { key: string; label: string; subtitle: string }[] = [
-  { key: "default-saas", label: "Stripe-like SaaS",      subtitle: "high ARPU, low churn" },
-  { key: "saas",         label: "Slack-like SaaS",       subtitle: "mid-market, freemium" },
-  { key: "marketplace",  label: "Airbnb-like marketplace", subtitle: "two-sided, low ARPU" },
-  { key: "enterprise",   label: "Workday-like enterprise", subtitle: "long sales cycle" },
-  { key: "viral",        label: "TikTok-like viral",     subtitle: "very high g, high churn" },
+  { key: "default-saas", label: "High-ARPU SaaS",        subtitle: "vertical / enterprise-tier seats" },
+  { key: "saas",         label: "Horizontal SaaS",       subtitle: "mid-market, freemium-led" },
+  { key: "marketplace",  label: "Two-sided marketplace", subtitle: "take-rate, low ARPU per side" },
+  { key: "enterprise",   label: "Enterprise-cycle",      subtitle: "long sales cycle, large ACV" },
+  { key: "viral",        label: "Consumer subscription", subtitle: "high acquisition, high churn" },
 ];
 
 // Editorial palette tokens (must match tailwind.config.ts)

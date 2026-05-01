@@ -292,7 +292,7 @@ export default function Page() {
                 Drive the threshold
               </p>
               <h2 className="mt-5 max-w-4xl text-3xl font-semibold leading-tight tracking-tight text-ink sm:text-4xl lg:text-5xl">
-                Drag the churn rate. Watch the company live or die.
+                Drag the churn rate. Watch the company recover or run out.
               </h2>
               <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted">
                 For each value of monthly churn, the cash balance at the end of
