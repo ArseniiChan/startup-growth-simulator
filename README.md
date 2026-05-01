@@ -1,5 +1,9 @@
 # Startup Growth Simulator
 
+> **Live at [startup-growth.vercel.app](https://startup-growth.vercel.app/)** — the editorial landing page with the methodology, the calibration valley, the μ\* slider, and a real-data anchor calibrated against Shopify Inc.'s pre-IPO S-1 quarterly revenue.
+>
+> **Interactive tool at [startup-growth-simulator.streamlit.app](https://startup-growth-simulator.streamlit.app/)** — plug in your own startup's parameters across all 8 model dimensions and watch the engine compute the trajectory, sensitivity, and runway-survival threshold μ\* live.
+
 **In one sentence:** I built a tool that finds the exact monthly user-cancellation
 rate above which a typical SaaS startup runs out of money before it can ever
 recover, and put a confidence interval around the answer using only numerical
@@ -15,15 +19,15 @@ New York, Spring 2026**. Every numerical method here — five ODE solvers,
 gradient descent, Adam, Newton/bisection/secant, finite differences, Richardson
 extrapolation, the Thomas algorithm, cubic splines, composite Simpson, Gaussian
 quadrature, Monte Carlo with Kahan summation — was implemented from scratch.
-No SciPy.
+**No SciPy.**
 
 The driving question:
 > At what user-churn rate does a startup's growth become *mathematically
 > irreversible* — and how confident can we be in that answer?
 
-(For precision in the report: μ\* is the runway-survival threshold at the
-specific 10-year horizon we evaluate, not the abstract phase-portrait
-separatrix. The two coincide for the regimes we tested.)
+(For precision: μ\* is the runway-survival threshold at the 10-year horizon
+we evaluate, not the abstract phase-portrait separatrix. The two coincide
+for the regimes we tested.)
 
 ## The two findings I'm proudest of
 
@@ -41,58 +45,60 @@ best-fit point. I then asked the harder question: does that ambiguity
 matter for the answer? Walking the valley via the smallest-eigenvalue
 eigenvector of the calibration loss Hessian, μ\* varies by ~2.4%.
 **Even though the calibration is ambiguous, the answer it produces is
-robust to that ambiguity.** That's a kind of result undergraduate
-projects don't typically uncover, and it's documented honestly in
+robust to that ambiguity.** Documented in
 [Notebook 5](notebooks/05_sensitivity_analysis.ipynb).
+
+**Real-data anchor:** the engine's Adam optimizer was also fit against
+Shopify Inc.'s pre-IPO S-1 quarterly revenue (9 quarters, 2012-Q4 through
+2014-Q4, public SEC EDGAR data). Recovered growth rate `g = 13.5%/month`,
+converged in 242 iterations. The fitted RK4 trajectory tracks the observed
+S-1 quarterly points cleanly. Visible on the live landing page; the
+calibration script is [`scripts/precompute_landing_data.py`](scripts/precompute_landing_data.py).
 
 > ⚠ **One caveat in the headline number:** the 95% CI above propagates
 > uncertainty in $(g, \mu_R)$ only — the conversion rate $\alpha$ is
 > held at its calibrated MAP. Because $\alpha$ has the largest sensitivity
 > ($\partial\mu^*/\partial\alpha \approx 3.04$, vs. 1.18 for $\mu_R$ and 0.51
 > for $g$), the marginal CI under joint uncertainty is wider than the
-> conditional CI reported. A full joint posterior is deferred to Phase 4
-> per `IMPLEMENTATION_PLAN.md`.
+> conditional CI reported. A full joint posterior is deferred work.
 
 ![convergence](report/figures/nb02_convergence.png)
 ![valley](report/figures/nb03_loss_surface_2param.png)
 
-## Status
+## Two surfaces, two audiences
+
+The project ships two distinct surfaces backed by the same Python engine:
+
+| Surface | URL | Audience | Optimized for |
+|---|---|---|---|
+| **Editorial landing** | [startup-growth.vercel.app](https://startup-growth.vercel.app/) | LinkedIn skim, recruiter, professor reading the writeup | 30-second skim, narrative arc, structural-identifiability finding, Shopify-calibrated real-data anchor |
+| **Interactive tool** | [startup-growth-simulator.streamlit.app](https://startup-growth-simulator.streamlit.app/) | A founder who wants to plug in their own company's numbers | 5–10 minutes of exploration, all 8 model parameters editable, live recompute |
+
+Both surfaces import from the same `engine/*` package — every solver,
+optimizer, root-finder, integrator, and Monte Carlo loop on either page
+lives in `engine/` and is covered by the test suite.
+
+## Status (all phases shipped)
 
 - **Phase 1 (shipped):** 4D ODE system, Euler / Heun / RK4, error metrics,
-  synthetic data generator, Notebook 1 (model + parameter sweep).
+  synthetic data generator, Notebook 1.
 - **Phase 2 (shipped):** Adams-Bashforth-4, Adams-Moulton predictor-corrector,
-  numerical differentiation (forward/central/5-point/Richardson),
-  gradient descent and Adam optimizers with adaptive numerical gradients,
-  Newton/bisection/secant root-finders, MSE loss + closure-factory loss
-  builder. Notebooks 2 (solver comparison + convergence) and 3 (model
-  calibration on synthetic data with the structural-identifiability
-  finding).
-- **Phase 3 (shipped):** composite Simpson + Gauss-Legendre quadrature
-  + `integrate_trajectory`, Thomas algorithm + natural & clamped cubic
-  splines, Monte Carlo (Kahan summation, antithetic variates,
-  convergence study). Notebooks 4 (Monte Carlo valuation), 5 (sensitivity
-  + break-even μ\* with Monte Carlo CI + profile-likelihood slice),
-  6 (cubic-spline funding rounds), 7 (comprehensive comparison +
-  driving-question answer). Streamlit dashboard `app.py` with 4
-  tabs. **113 tests passing.**
-- **Phase 4-5 (remaining):** real-data calibration (hand-curated S-1
-  filings for Shopify/Zoom), Streamlit Cloud deployment, presentation
-  slides, written report.
+  numerical differentiation (forward / central / 5-point / Richardson),
+  gradient descent and Adam optimizers, Newton/bisection/secant root-finders,
+  MSE loss + closure-factory loss builder. Notebooks 2 & 3.
+- **Phase 3 (shipped):** composite Simpson + Gauss-Legendre quadrature,
+  Thomas algorithm + natural & clamped cubic splines, Monte Carlo (Kahan
+  summation, antithetic variates, convergence study). Notebooks 4 through 7.
+  Streamlit interactive tool with all 8-parameter sliders.
+- **Phase 4 (shipped):** Editorial Next.js + Tailwind landing page deployed
+  to Vercel. 5 chart components (trajectory grid, μ\* slider, valley
+  contour heatmap, MC posterior histogram, sensitivity tornado). VC-insights
+  band. Real-data anchor calibrated against Shopify Inc.'s pre-IPO S-1
+  quarterly revenue. Synthetic-data disclosure surfaced in-line and in the
+  navy band.
 
-## Headline answer
-
-**μ\* ≈ 14.2% per month, 95% CI [8.0%, 16.0%]** — the critical user-churn
-rate above which the default-SaaS profile never recovers within a 10-year
-horizon. Identifiable despite the calibration valley in (g, μ_R) — the
-profile-likelihood slice in Notebook 5 (along the smallest-eigenvalue
-eigenvector of the calibration-loss Hessian) shows μ\* varies by ~2.4%
-along the valley span — small enough that the answer is meaningfully
-robust to the calibration ambiguity. See `notebooks/07_comprehensive_comparison.ipynb`
-for the full synthesis.
-
-Numerical methods are implemented from scratch — no `scipy.integrate`,
-`scipy.optimize`, or `scipy.interpolate`. NumPy is used for array
-operations only.
+**114 tests passing.** Validation-first: no engine module enters a notebook
+until its tests pass.
 
 ## Layout
 
@@ -113,14 +119,31 @@ engine/                  Pure numerical methods. No UI imports.
   utils.py               error metrics, convergence-order, linear interp,
                          timer, latex_table.
 
-app.py                   Streamlit dashboard — 4 tabs (trajectory, MC,
-                         break-even μ*, sensitivity).
+app.py                   Streamlit interactive tool (the "plug in your
+                         numbers" surface).
 
-tests/                   pytest. 113 tests. Validation-first: no engine
+landing/                 Next.js 14 + Tailwind editorial landing page,
+                         deployed to Vercel.
+  src/app/page.tsx       Single-route scrollytelling layout (10 sections).
+  src/components/        TrajectoryChart, MuStarSlider, ValleyContour,
+                         PosteriorHistogram, TornadoChart, ShopifyAnchor,
+                         VcInsights, Reveal.
+  public/data/           Precomputed JSON datasets (~91 KB) consumed by
+                         the chart components — output of the Python engine,
+                         served as static files. The page does not run
+                         Python at runtime.
+  public/figures/        Static figures from the matplotlib notebooks.
+
+scripts/
+  precompute_landing_data.py    Regenerates the JSON datasets from engine/
+                                (also runs the Shopify S-1 calibration).
+  build_deck.js                 Presentation deck builder (in progress).
+
+tests/                   pytest. 114 tests. Validation-first: no engine
                          module is imported by a notebook until its tests
                          pass.
 
-notebooks/               7 of 7 shipped.
+notebooks/               7 of 7 shipped, all execute clean.
   01_growth_ode_system.ipynb       4D model + parameter exploration.
   02_ode_solvers_comparison.ipynb  Convergence orders + timing + agreement.
   03_model_calibration.ipynb       Synthetic recovery + the valley.
@@ -130,26 +153,32 @@ notebooks/               7 of 7 shipped.
   06_interpolation_funding_rounds.ipynb  Splines vs ODE comparison.
   07_comprehensive_comparison.ipynb      Synthesis + driving-question answer.
 
-data/                    Datasets and the synthetic generator.
-  s1_filings/            Real quarterly revenue (populated in Phase 4-5).
-  funding_rounds/        Public funding-round data (populated in Phase 4-5).
+data/
+  s1_filings/            Real quarterly revenue from SEC EDGAR.
+    shopify.json         Shopify Inc. S-1 + 10-Q quarterly revenue,
+                         2012-Q4 through 2014-Q4 (9 quarters).
+  funding_rounds/        Public funding-round data (planned).
   generate_synthetic.py  Replayable synthetic generator with fixed seeds.
 
 slides/                  Lecture PPTXs (gitignored — local copy only).
-report/figures/          Notebook-exported figures (25 PNGs, gitignored).
+report/figures/          Notebook-exported figures (gitignored).
 ```
 
 ## Install and run
 
 ```bash
 pip install -r requirements.txt
-python -m pytest tests/                                # 113 tests, ~25s
-python -m data.generate_synthetic                      # writes data/synthetic/*.json
-jupyter notebook notebooks/                            # 7 notebooks
-streamlit run app.py                                   # interactive dashboard
+python -m pytest tests/                          # 114 tests, ~20s
+python -m data.generate_synthetic                # writes data/synthetic/*.json
+python -m scripts.precompute_landing_data        # regenerate landing JSON
+
+jupyter notebook notebooks/                      # 7 notebooks
+streamlit run app.py                             # the interactive tool
+
+cd landing && npm install && npm run dev         # the editorial landing
 ```
 
-Python 3.11+. NumPy 1.26+ (or 2.x).
+Python 3.11+. NumPy 1.26+ (or 2.x). Node 20+ for the landing.
 
 ## The model
 
@@ -167,3 +196,7 @@ deferred revenue, dunning).
 
 See `IMPLEMENTATION_PLAN.md` for the full task breakdown and
 `FULL_PROJECT_PLAN.md` for the math, theory, and report outline.
+
+---
+
+*Built solo over the spring 2026 semester. Arsenii Chan, City College of New York.*

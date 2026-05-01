@@ -1,13 +1,24 @@
-"""Streamlit dashboard — interactive front-end for the engine.
+"""Streamlit dashboard — the interactive tool surface.
+
+The role of this app, in the project's two-surface architecture:
+    - The Vercel page at https://startup-growth.vercel.app/ is the
+      editorial landing — story, methodology, Shopify-calibrated
+      real-data anchor. Read-only. Optimized for a 30-second skim.
+    - This Streamlit app is the interactive playground. A founder
+      who arrives here from the landing page's "Try yourself" link
+      can plug in their own startup's parameters across all 8 model
+      dimensions and watch what the engine computes. Read-write.
+      Optimized for 5-10 minutes of exploration.
+
+Both surfaces consume exactly the same engine/* package — every
+solver, optimizer, root-finder, integrator, and Monte Carlo loop on
+this page lives in engine/* and is covered by the 114-test suite.
 
 Run locally:
     streamlit run app.py
 
-Deploy: connect this repo to Streamlit Community Cloud and select app.py.
-
-The dashboard imports ONLY from the engine package — no inline numerics.
-Every solver, optimizer, root-finder, integrator, and Monte Carlo loop
-on this page lives in engine/* and is covered by the test suite.
+Deploy: connect this repo to Streamlit Community Cloud, select
+app.py, accept the .streamlit/config.toml theme.
 """
 
 from __future__ import annotations
@@ -52,12 +63,82 @@ SOLVERS = {
 # Sidebar — startup parameter controls
 # ----------------------------------------------------------------------------
 
-st.set_page_config(page_title="Startup Growth Simulator", layout="wide")
-st.title("Startup Growth Simulator")
+st.set_page_config(
+    page_title="μ* — Interactive Tool · Startup Growth",
+    layout="wide",
+    initial_sidebar_state="expanded",
+    menu_items={
+        "About": (
+            "Interactive companion to startup-growth.vercel.app. "
+            "Plug in your own startup's parameters and watch the engine "
+            "compute the trajectory, sensitivity, and runway-survival "
+            "threshold μ* live. Built from scratch in Python (no SciPy). "
+            "CSC 30100 · Spring 2026 · Arsenii Chan."
+        ),
+    },
+)
+
+# Hide Streamlit's default chrome — the "Manage app" badge in the bottom-right,
+# the "Made with Streamlit" footer, and the deploy/share toolbar buttons in the
+# top-right. These are the school-project tells the v3 council flagged. We
+# keep the hamburger menu (it has the About item set above) and the page
+# itself, just remove the visible Streamlit-Cloud branding.
+st.markdown(
+    """
+    <style>
+      /* "Manage app" floating badge */
+      [data-testid="stStatusWidget"] { display: none !important; }
+      .viewerBadge_link__1S137 { display: none !important; }
+      .viewerBadge_container__r5tak { display: none !important; }
+
+      /* "Made with Streamlit" footer */
+      footer { visibility: hidden !important; }
+      footer:after { display: none !important; }
+
+      /* Top-right deploy / share / star icons (keep the hamburger only) */
+      [data-testid="stDecoration"] { display: none !important; }
+      header [data-testid="stToolbar"] { right: 8px; }
+      header [data-testid="stToolbar"] button[kind="header"] {
+        /* Hide the share/star/github/edit icons; keep the kebab menu */
+      }
+
+      /* Tighten top spacing now that the chrome is gone */
+      .block-container { padding-top: 2rem !important; }
+
+      /* Use Inter (or system) instead of Streamlit's default Source Sans Pro,
+         to match the Vercel landing's typography. */
+      html, body, [class*="css"] {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter,
+                     "Helvetica Neue", Arial, sans-serif !important;
+      }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+# Top banner: breadcrumb back to the editorial landing. Sets context for
+# anyone who lands here directly via search instead of via the landing's
+# "Try yourself" link.
+st.markdown(
+    """
+    <div style='padding: 8px 0 24px 0; border-bottom: 1px solid #E2E8F0; margin-bottom: 24px;'>
+      <span style='font-family: ui-monospace, monospace; color: #DC2626; font-weight: 600;'>μ*</span>
+      <span style='font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; color: #0F172A; font-weight: 600; margin-left: 8px;'>Interactive Tool</span>
+      <span style='color: #475569; font-size: 13px; margin-left: 8px;'>· companion to <a href='https://startup-growth.vercel.app/' style='color: #475569; text-decoration: underline;' target='_blank'>startup-growth.vercel.app</a></span>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+st.markdown(
+    "## Plug in your startup's numbers."
+)
 st.caption(
-    "A 4D ODE simulator built from scratch in Python. CSC 30100 final project. "
-    "Driving question: *at what user-churn rate does growth become "
-    "mathematically irreversible — and how confident can we be in that answer?*"
+    "Drive every parameter the engine accepts. Trajectory, Monte Carlo, "
+    "break-even threshold, and sensitivity recompute live as you change "
+    "values in the sidebar. For the writeup, the Shopify-calibrated "
+    "real-data anchor, and the structural-identifiability finding, see "
+    "[startup-growth.vercel.app](https://startup-growth.vercel.app/)."
 )
 
 with st.sidebar:

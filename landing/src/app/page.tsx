@@ -77,6 +77,14 @@ export default function Page() {
               The answer
             </a>
             <a
+              href={STREAMLIT_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="hidden text-muted transition hover:text-ink md:inline"
+            >
+              Try yourself <ArrowOut className="ml-0.5" />
+            </a>
+            <a
               href={REPO_URL}
               target="_blank"
               rel="noreferrer"
@@ -474,7 +482,7 @@ export default function Page() {
                 rel="noreferrer"
                 className="text-muted transition hover:text-ink"
               >
-                Raw Python notebook (Streamlit){" "}
+                Plug in your own numbers (interactive tool){" "}
                 <ArrowOut className="ml-0.5" />
               </a>
             </div>
