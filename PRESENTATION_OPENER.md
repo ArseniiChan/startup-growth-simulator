@@ -1,7 +1,7 @@
 # 90-Second Cold-Open
 
-*Written before any further code work, per the chairman's directive. Read
-this verbatim or close to it; it frames everything else.*
+*Written before any further code work. Read this verbatim or close to
+it; it frames everything else.*
 
 ---
 

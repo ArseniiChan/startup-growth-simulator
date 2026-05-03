@@ -80,9 +80,9 @@ st.set_page_config(
 
 # Hide Streamlit's default chrome — the "Manage app" badge in the bottom-right,
 # the "Made with Streamlit" footer, and the deploy/share toolbar buttons in the
-# top-right. These are the school-project tells the v3 council flagged. We
-# keep the hamburger menu (it has the About item set above) and the page
-# itself, just remove the visible Streamlit-Cloud branding.
+# top-right. These were the visible school-project tells. We keep the
+# hamburger menu (it has the About item set above) and the page itself,
+# just remove the visible Streamlit-Cloud branding.
 st.markdown(
     """
     <style>
