@@ -293,7 +293,7 @@ def build_document() -> Document:
     )
     add_body(
         doc,
-        "Scope first. The synthetic parameter profiles in "
+        "The synthetic parameter profiles in "
         "Sections 4, 6, and 7 are illustrative archetypes, not real "
         "companies; only Section 5 uses real data. The 95% credible "
         "interval reported in Section 6 propagates uncertainty in "
@@ -611,8 +611,8 @@ def build_document() -> Document:
     )
     add_body(
         doc,
-        "The follow-up question: if calibration cannot uniquely "
-        "recover (g, μ_R), can any downstream quantity be trusted? "
+        "If calibration cannot uniquely recover (g, μ_R), can any "
+        "downstream quantity be trusted? "
         "Walking along the smallest-eigenvalue eigenvector of H (the "
         "direction the data is least informative about) and "
         "recomputing μ* at each step, the threshold drifts by only "
@@ -688,20 +688,20 @@ def build_document() -> Document:
     )
     add_body(
         doc,
-        "Two caveats on Figure 6. First, the "
-        "fit is honest but imperfect: residuals are non-white, with "
-        "the engine's curve sitting below the observed values in the "
-        "first six quarters and crossing through the data in the "
+        "The fit is honest but imperfect. Residuals are non-white: "
+        "the engine's curve sits below the observed values in the "
+        "first six quarters and crosses through the data in the "
         "later quarters. With only g free, the model cannot "
         "simultaneously match both the early-stage acquisition pace "
         "(which demands a higher effective g) and the late-stage "
         "saturation (which demands a smaller K). A two-parameter "
         "(g, K) fit on a longer window would be the natural next "
-        "step. Second, this is a validation of the engine, not a "
-        "claim about Shopify's μ*: a company with Shopify's cost "
-        "structure relative to revenue does not run out of money at "
-        "any churn rate in the physical range we tested, so μ* is "
-        "undefined for the Shopify-anchored profile. The headline "
+        "step. The Shopify result is also a validation of the "
+        "engine, not a claim about Shopify's μ*: a company with "
+        "Shopify's cost structure relative to revenue does not run "
+        "out of money at any churn rate in the physical range we "
+        "tested, so μ* is undefined for the Shopify-anchored "
+        "profile. The headline "
         "μ* ≈ 14.2% number applies to the synthetic default-SaaS "
         "profile, not to Shopify.",
     )
@@ -799,7 +799,7 @@ def build_document() -> Document:
     )
     add_body(
         doc,
-        "One qualifier on this number. The Monte "
+        "The Monte "
         "Carlo above propagates uncertainty in (g, μ_R), the two "
         "parameters whose calibration is rigorously characterized in "
         "Section 4, while α and the remaining five parameters are "
