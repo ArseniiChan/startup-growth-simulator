@@ -2,7 +2,7 @@
 
 Two outputs go to ``report/figures/``:
 
-1. ``nb_shopify_fit.png`` — engine RK4 fit overlaid on Shopify's 9 S-1
+1. ``nb_shopify_fit.png`` — engine RK4 fit overlaid on Shopify's 9 F-1
    quarterly revenue points (reads ``shopify_calibration.json``).
 2. ``pres_loss_surface.png`` — clean redraw of the calibration loss
    surface (reads ``valley_surface.json``). The notebook-exported version
@@ -54,7 +54,7 @@ def render_shopify() -> None:
         label="Engine RK4 fit (g recovered)",
         zorder=2,
     )
-    # Observed S-1 quarterly revenue — coral scatter
+    # Observed F-1 quarterly revenue — coral scatter
     ax.scatter(
         obs_months,
         obs_rev_m,
@@ -63,7 +63,7 @@ def render_shopify() -> None:
         edgecolor="white",
         linewidth=1.5,
         zorder=3,
-        label="Shopify S-1 quarterly (observed)",
+        label="Shopify F-1 quarterly (observed)",
     )
 
     ax.set_xlabel("Month (0 = 2012-Q4)", fontsize=11, color=INK)
