@@ -1,16 +1,16 @@
 """Build the 15-page CSC 30100 final report as a Times New Roman / 12pt /
 double-spaced .docx via python-docx.
 
-Output: report/final_report.docx
+Output: report/Chan_Arsenii_CSC30100_FinalReport.docx
 
-Design notes (from council audit, May 1 2026):
+Editorial guidelines for the report:
 
-- Lead with the math thesis, not the deployment URLs. The README does the
-  marketing job; the report does the rigor job.
+- Lead with the math thesis, not the deployment URLs. The README handles
+  the public-facing description; this report carries the rigor.
 - Include explicit measured-vs-theoretical convergence orders as a table.
-- Surface kappa(H) ≈ 510 in the identifiability discussion (already
-  computed in notebook 5). Frame as a *conditioning* result.
-- Keep the 95% CI honest — the alpha-held-fixed caveat must appear in §6.
+- Surface kappa(H) ~= 510 in the identifiability discussion. Frame as a
+  conditioning result.
+- Keep the 95% CI honest. The alpha-held-fixed caveat must appear in §6.
 - Avoid SciPy comparisons (not the project's pitch, not in Burden et al.).
 - Cite tests/ as primary evidence for convergence-order claims.
 """
@@ -28,7 +28,7 @@ from docx.shared import Inches, Pt
 
 REPO = Path(__file__).resolve().parent.parent
 FIG = REPO / "report" / "figures"
-OUT = REPO / "report" / "final_report.docx"
+OUT = REPO / "report" / "Chan_Arsenii_CSC30100_FinalReport.docx"
 
 FONT = "Times New Roman"
 BODY_PT = 12
@@ -237,10 +237,10 @@ def build_document() -> Document:
         "representative SaaS profile, μ* ≈ 14.2% per month with a 95% "
         "conditional credible interval of [8.0%, 16.0%]. Beyond the "
         "headline number, fitting growth rate g and billing-cycle lag "
-        "μ_R jointly produces a curved valley in the loss surface — a "
+        "μ_R jointly produces a curved valley in the loss surface, a "
         "structural-identifiability finding with condition number "
-        "κ(H) ≈ 510 along the calibration directions — but a "
-        "Hessian-eigenvector traversal of that valley shifts μ* by "
+        "κ(H) ≈ 510 along the calibration directions. A Hessian-"
+        "eigenvector traversal of that valley shifts μ* by "
         "only ≈2.4%. The calibration is ambiguous; the answer is "
         "robust. I additionally fit the same engine against nine "
         "quarters of Shopify Inc. pre-IPO quarterly revenue (SEC "
@@ -256,9 +256,9 @@ def build_document() -> Document:
     add_body(
         doc,
         "An investor evaluating an early-stage software startup must "
-        "decide whether the company's unit economics — its rates of "
+        "decide whether the company's unit economics (its rates of "
         "acquiring users, converting them to paying customers, and "
-        "losing those paying customers each month — will carry it "
+        "losing those paying customers each month) will carry it "
         "into cash-positive territory before its seed funding runs "
         "out. Given a model of the dynamics, that decision reduces "
         "to a number. This project poses the question precisely: hold "
@@ -293,7 +293,7 @@ def build_document() -> Document:
     )
     add_body(
         doc,
-        "A note on scope. The synthetic parameter profiles in "
+        "Scope first. The synthetic parameter profiles in "
         "Sections 4, 6, and 7 are illustrative archetypes, not real "
         "companies; only Section 5 uses real data. The 95% credible "
         "interval reported in Section 6 propagates uncertainty in "
@@ -432,11 +432,14 @@ def build_document() -> Document:
         "Calibration is a nonlinear least-squares problem: choose θ "
         "to minimize MSE between model and observed revenue. I "
         "implement gradient descent and Adam (Kingma & Ba, 2014) "
-        "from scratch in engine/optimizer.py. Plain gradient descent "
-        "stalls in the curved valley discussed in Section 4; Adam's "
-        "bias-corrected moment estimates handle the valley reliably "
-        "and is the default. Gradients are computed by finite "
-        "differences (Section 3.4) — no automatic differentiation.",
+        "from scratch in engine/optimizer.py. My initial calibration "
+        "with vanilla gradient descent stalled along the curved "
+        "(g, μ_R) ridge discussed in Section 4: successive iterates "
+        "oscillated across the valley without descending it. "
+        "Switching to Adam, with its per-parameter adaptive step, "
+        "recovered convergence; Adam is the default. Gradients are "
+        "computed by finite differences (Section 3.4); no automatic "
+        "differentiation.",
     )
 
     add_heading(doc, "3.3. Root-finding", level=2)
@@ -450,10 +453,11 @@ def build_document() -> Document:
         "secant (Ch. 2.3, super-linear at rate φ ≈ 1.618), and "
         "Newton's method (Ch. 2.3, quadratic). I implement all "
         "three in engine/root_finding.py. Newton uses a central-"
-        "difference numerical derivative and falls back to a "
-        "bisection step if the Newton update would leave the "
-        "bracket — important because C(μ) flattens at small μ "
-        "where naive Newton can overshoot.",
+        "difference numerical derivative. Pure Newton iterations "
+        "overshot the bracket on early test runs whenever the "
+        "derivative flattened near μ ≈ 0, so the implementation "
+        "falls back to a bisection step whenever a Newton update "
+        "would exit the current bracket.",
     )
     add_figure(
         doc,
@@ -541,8 +545,8 @@ def build_document() -> Document:
     add_body(
         doc,
         "Suppose a researcher observes the company's monthly recurring "
-        "revenue for some period — say twelve months of historical "
-        "MRR — and wants to estimate the parameters of the model from "
+        "revenue for some period (say twelve months of historical "
+        "MRR) and wants to estimate the parameters of the model from "
         "those observations. Formally: choose θ = (g, K, α, μ, p, "
         "μ_R, F, v) to minimize the sum of squared residuals between "
         "model-predicted R(t_i; θ) and the noisy observation "
@@ -554,9 +558,9 @@ def build_document() -> Document:
     )
     add_body(
         doc,
-        "Recovering the growth rate g alone — that is, holding the "
+        "Recovering the growth rate g alone (that is, holding the "
         "other seven parameters at their truth values and asking only "
-        "for g — works well: gradient descent and Adam both converge "
+        "for g) works well: gradient descent and Adam both converge"
         "to within 1% of g_truth in fewer than 200 iterations, "
         "regardless of starting point in the physical range. The "
         "interesting failure mode appears when I attempt to recover "
@@ -609,8 +613,8 @@ def build_document() -> Document:
         doc,
         "The follow-up question: if calibration cannot uniquely "
         "recover (g, μ_R), can any downstream quantity be trusted? "
-        "Walking along the smallest-eigenvalue eigenvector of H — "
-        "the direction the data is least informative about — and "
+        "Walking along the smallest-eigenvalue eigenvector of H (the "
+        "direction the data is least informative about) and "
         "recomputing μ* at each step, the threshold drifts by only "
         "≈2.4% across the full traversal. The calibration is "
         "ambiguous; the answer is robust.",
@@ -642,16 +646,21 @@ def build_document() -> Document:
         "an additional calibration against nine quarters of Shopify "
         "Inc.'s pre-IPO quarterly revenue, sourced from the company's "
         "publicly filed S-1 registration statement and the subsequent "
-        "10-Q amendments — a total observation window from 2012-Q4 "
+        "10-Q amendments. The observation window spans 2012-Q4 "
         "through 2014-Q4. The data are from the U.S. Securities and "
-        "Exchange Commission's EDGAR system.",
+        "Exchange Commission's EDGAR system. Because the engine "
+        "integrates time in months while Shopify reports revenue "
+        "quarterly, I converted each quarterly figure to a monthly "
+        "USD value before fitting (revenue / 3, attributed to the "
+        "midpoint of the quarter); the conversion is in "
+        "scripts/precompute_landing_data.py.",
     )
     add_body(
         doc,
         "Because nine quarters is too short an observation window to "
-        "identify all eight parameters jointly — the same valley "
-        "argument from Section 4 applies — I anchored seven of the "
-        "eight parameters at values consistent with Shopify's "
+        "identify all eight parameters jointly (the same valley "
+        "argument from Section 4 applies), I anchored seven of the "
+        "eight parameters at values consistent with Shopify's"
         "publicly reported business at the time of the filings (ARPU "
         "of about $30 per merchant per month, a churn rate consistent "
         "with reported retention statistics, etc.) and let the "
@@ -679,7 +688,7 @@ def build_document() -> Document:
     )
     add_body(
         doc,
-        "Two cautious points should accompany Figure 6. First, the "
+        "Two caveats on Figure 6. First, the "
         "fit is honest but imperfect: residuals are non-white, with "
         "the engine's curve sitting below the observed values in the "
         "first six quarters and crossing through the data in the "
@@ -703,9 +712,8 @@ def build_document() -> Document:
     add_heading(doc, "6. The Survival Threshold μ* and Its Confidence Interval", level=1)
     add_body(
         doc,
-        "With the model specified, the methods verified, and the "
-        "calibration characterized, I now compute the headline "
-        "quantity. Define the terminal-cash function:",
+        "I now compute the headline quantity. Define the terminal-"
+        "cash function:",
     )
     add_equation(doc, "C(μ; θ_*) = Cash(T = 120; μ, g_*, K_*, α_*, p_*, μ_R*, F_*, v_*),")
     add_body(
@@ -791,10 +799,10 @@ def build_document() -> Document:
     )
     add_body(
         doc,
-        "An honest qualifier on this number is required. The Monte "
-        "Carlo above propagates uncertainty in (g, μ_R) — the two "
+        "One qualifier on this number. The Monte "
+        "Carlo above propagates uncertainty in (g, μ_R), the two "
         "parameters whose calibration is rigorously characterized in "
-        "Section 4 — while α and the remaining five parameters are "
+        "Section 4, while α and the remaining five parameters are "
         "held at their MAP estimates. As Section 7 shows, α is the "
         "dominant sensitivity (|∂μ*/∂α| is roughly three times "
         "|∂μ*/∂μ_R| and six times |∂μ*/∂g|), so holding it fixed "
@@ -863,9 +871,9 @@ def build_document() -> Document:
         "interval of [8.0%, 16.0%]. The second is the structural-"
         "identifiability finding: when calibrating from finite noisy "
         "revenue data, the parameters g and μ_R are not separately "
-        "identifiable — they live on a curved valley in loss space "
+        "identifiable. They live on a curved valley in loss space "
         "with condition number κ ≈ 510 along the calibration "
-        "directions — yet μ* itself drifts by only about 2.4% along "
+        "directions, yet μ* itself drifts by only about 2.4% along "
         "the worst-conditioned direction of that valley. Even an "
         "ambiguous calibration produces a robust answer to the "
         "downstream question. The third finding is the sensitivity "
@@ -875,22 +883,27 @@ def build_document() -> Document:
     )
     add_body(
         doc,
-        "Three lessons: a wrong model produces precise nonsense (a "
-        "Phase-1 structural defect in the revenue equation, had it "
-        "survived to calibration, would have been hidden by a "
-        "cleanly-converging fit); identifiability matters more than "
-        "accuracy (a low MSE on a non-identifiable problem is "
-        "meaningless); validation-first separates engineering from "
-        "coursework (tests written before notebooks gate downstream "
-        "work). Limitations and future work: the 95% credible "
-        "interval is conditional on α at MAP — a fully-joint "
-        "posterior with longer observation windows or hierarchical "
-        "priors would widen and refine it. The Shopify fit could "
-        "extend to a (g, K, μ_R) joint fit on post-IPO 10-Q filings "
-        "(≈30 quarters) for a predictive comparison. The "
+        "Three lessons. First: a wrong model produces precise "
+        "nonsense. A Phase-1 structural defect in the revenue "
+        "equation would have been hidden by a cleanly-converging "
+        "calibration if it had survived that long. Second: "
+        "identifiability matters more than accuracy. A low MSE on "
+        "a non-identifiable problem is meaningless. Third: "
+        "validation-first separates engineering from coursework, "
+        "with tests written before notebooks gating downstream "
+        "work.",
+    )
+    add_body(
+        doc,
+        "Limitations and future work: the 95% credible interval is "
+        "conditional on α at MAP, and a fully-joint posterior with "
+        "longer observation windows or hierarchical priors would "
+        "widen and refine it. The Shopify fit could extend to a "
+        "(g, K, μ_R) joint fit on post-IPO 10-Q filings (≈30 "
+        "quarters available) for a predictive comparison. The "
         "deterministic-dynamics assumption could be relaxed to an "
-        "SDE treatment for early-stage acquisition. None changes the "
-        "engine architecture.",
+        "SDE treatment for early-stage acquisition. None of these "
+        "changes the engine architecture.",
     )
 
     # ---------------------------------------------------------------------
@@ -923,8 +936,27 @@ def build_document() -> Document:
     return doc
 
 
+def _set_document_properties(doc: Document) -> None:
+    """Set the .docx core properties so the file's Properties dialog shows
+    sensible author/title/subject fields rather than python-docx defaults."""
+    cp = doc.core_properties
+    cp.author = "Arsenii Chan"
+    cp.last_modified_by = "Arsenii Chan"
+    cp.title = "Startup Growth Dynamics & Valuation"
+    cp.subject = "CSC 30100 Final Project Report — Spring 2026"
+    cp.keywords = "numerical analysis, ODE, calibration, identifiability"
+    cp.comments = ""
+    # Created/modified timestamps default to 2013 in python-docx; refresh
+    # to the build moment so the file metadata isn't anachronistic.
+    from datetime import datetime, timezone
+    now = datetime.now(timezone.utc).replace(microsecond=0)
+    cp.created = now
+    cp.modified = now
+
+
 def main() -> None:
     doc = build_document()
+    _set_document_properties(doc)
     OUT.parent.mkdir(parents=True, exist_ok=True)
     doc.save(str(OUT))
     print(f"wrote {OUT}")
