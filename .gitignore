@@ -233,8 +233,16 @@ out/
 next-env.d.ts
 .vercel/
 
-# Compiled presentation artifact (regenerated from scripts/build_deck.js)
+# Compiled presentation artifacts (regenerated from scripts/build_deck.js)
 report/presentation.pptx
+report/presentation.pdf
+
+# OS / editor cruft
+.DS_Store
+**/.DS_Store
+~$*.docx
+~$*.doc
+~$*.xlsx
 
 # Local working notes / AI-assistant scratchpads — never commit
 CLAUDE.md
