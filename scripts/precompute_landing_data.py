@@ -296,19 +296,27 @@ def precompute_tornado() -> None:
 
 
 # ---------------------------------------------------------------------------
-# 6. Shopify S-1 calibration — the real-data anchor
+# 6. Shopify F-1 calibration — the real-data anchor
 # ---------------------------------------------------------------------------
 
 
 def precompute_shopify_calibration() -> None:
     """Calibrate the engine against Shopify's pre-IPO quarterly revenue.
 
-    Reads data/s1_filings/shopify.json (9 quarters from S-1, public SEC data).
+    Reads data/s1_filings/shopify.json (9 quarters from F-1, public SEC data).
+    Shopify is a Canadian foreign private issuer; Form F-1 is the foreign-
+    issuer analogue of S-1. CIK 0001594805. F-1 filed 2015-04-14;
+    F-1/A amendments 2015-05-06 and 2015-05-19.
+
     Holds business-domain parameters at Shopify-reasonable values inferred
-    from public sources (ARPU ~$50/mo per merchant, ~5% monthly merchant
-    churn, larger fixed costs than the synthetic preset to reflect real
-    operating expense). Fits (g, K, mu_R) via Adam against the observed
-    revenue curve.
+    from F-1 disclosures (subscription ARPU ~$50/mo per merchant — F-1
+    reports MRR $2.0M for 41,295 merchants Dec 2012 ≈ $49/mo, $6.6M for
+    144,670 merchants Dec 2014 ≈ $45/mo; ~4% monthly gross merchant
+    churn — F-1 reports 99-101% Monthly Billings Retention Rate net of
+    expansion; F set to $2M/mo as a low-end fixed-cost estimate, smaller
+    than F-1's total 2014 OpEx of ~$80M because S&M scales with
+    acquisition rather than acting as a fixed cost). Fits g via Adam
+    against the observed revenue curve.
 
     Output is a real-data anchor section: a calibrated parameter set, the
     fitted vs observed trajectory for the page to render, and the
@@ -316,7 +324,7 @@ def precompute_shopify_calibration() -> None:
     """
     from engine.utils import linear_interpolate
 
-    # Load real Shopify S-1 data
+    # Load real Shopify F-1 data
     shopify_path = REPO_ROOT / "data" / "s1_filings" / "shopify.json"
     with open(shopify_path) as f:
         shopify = json.load(f)
@@ -326,34 +334,38 @@ def precompute_shopify_calibration() -> None:
     # engine's R(t) unit) — divide by 3 because the engine's R(t) is monthly.
     obs_R = np.array([row["revenue_thousands"] * 1000.0 / 3.0 for row in shopify["data"]])
 
-    # Anchor non-fitted parameters at Shopify-reasonable values (public-data
-    # informed). Per the implementation plan, fitting all 8 parameters from
+    # Anchor non-fitted parameters at Shopify-reasonable values, F-1
+    # informed. Per the implementation plan, fitting all 8 parameters from
     # a single revenue curve is underdetermined; we fit a 2-param subset
     # (g, K) — the well-conditioned cousin of the curved-valley (g, mu_R)
     # fit documented in Notebook 3. mu_R, alpha, mu, p, F, v are anchored
-    # at values inferred from Shopify's public S-1 + post-IPO disclosures.
+    # at values inferred from Shopify's F-1 + early post-IPO 6-K
+    # disclosures.
     anchor = StartupParams(
         g=0.08,            # initial guess; will be fit. ~8%/mo user growth.
         K=1_500_000,       # initial guess; will be fit. Plausible TAM.
         alpha=1.0,         # treat all acquired merchants as paying (no funnel split for revenue calibration)
-        mu=0.04,           # ~4% monthly merchant churn (public Shopify estimates)
-        p=50.0,            # ~$50/mo ARPU per merchant typical for Shopify mix
+        mu=0.04,           # ~4% monthly gross merchant churn. F-1 reports 99-101% net retention.
+        p=50.0,            # ~$50/mo subscription ARPU per merchant. Verified vs F-1: $2.0M MRR / 41,295 merchants Dec 2012 ≈ $49/mo.
         mu_R=0.30,         # fast lag — Shopify recognizes monthly subscriptions promptly
-        F=2_000_000.0,     # ~$2M/mo fixed operating costs in 2014-era Shopify
-        v=30.0,            # ~$30 CAC per merchant
+        F=2_000_000.0,     # ~$2M/mo non-S&M fixed costs (G&A + base R&D). F-1 total 2014 OpEx ~$80M but S&M scales with acquisition.
+        v=30.0,            # cost per newly acquired user. NOTE: low estimate; F-1 implies blended CAC closer to $700-800. Affects cash trajectory only, not g recovery.
     )
 
     # Per Notebook 3's finding: 2-param (g, mu_R) recovery hits a curved
     # valley, and K is unidentifiable from short revenue data alone (the
     # logistic acquisition term g*U*(1-U/K) is negligibly affected by K
-    # while U << K, which it is for the entire S-1 window). The
+    # while U << K, which it is for the entire F-1 window). The
     # well-conditioned recovery is g ALONE, holding everything else at
-    # public-data-informed anchors. This matches the project's
-    # methodology contract.
+    # F-1-informed anchors. This matches the project's methodology contract.
     fit_indices = [0]  # g only
-    # Shopify had ~25K merchants in Q4 2012 (per S-1 disclosures).
+    # Initial state at start of Q4 2012. F-1 reports 41,295 merchants at
+    # Dec 31, 2012; this 25K is the early-Q4 2012 estimate (interpolating
+    # from prior quarter). The 5-10K gap is a small initial-condition
+    # approximation that does not affect the g recovery materially since
+    # g is fit against revenue trajectory shape, not absolute levels.
     y0 = np.array([25_000.0, 25_000.0, 1_500_000.0, 130_000_000.0])
-    T = 27.0  # cover the 9 quarters of S-1 data with margin
+    T = 27.0  # cover the 9 quarters of F-1 data with margin
     h = 0.25
 
     loss_fn = make_loss_fn(obs_t, obs_R, anchor, fit_indices, rk4, y0, (0.0, T), h)

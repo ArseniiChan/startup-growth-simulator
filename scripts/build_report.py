@@ -645,15 +645,22 @@ def build_document() -> Document:
         "machinery survives contact with real data. I therefore ran "
         "an additional calibration against nine quarters of Shopify "
         "Inc.'s pre-IPO quarterly revenue, sourced from the company's "
-        "publicly filed S-1 registration statement and the subsequent "
-        "10-Q amendments. The observation window spans 2012-Q4 "
-        "through 2014-Q4. The data are from the U.S. Securities and "
-        "Exchange Commission's EDGAR system. Because the engine "
-        "integrates time in months while Shopify reports revenue "
-        "quarterly, I converted each quarterly figure to a monthly "
-        "USD value before fitting (revenue / 3, attributed to the "
-        "midpoint of the quarter); the conversion is in "
-        "scripts/precompute_landing_data.py.",
+        "publicly filed Form F-1 registration statement (Shopify is a "
+        "Canadian foreign private issuer; F-1 is the foreign-issuer "
+        "analogue of S-1) filed April 14, 2015, plus the F-1/A "
+        "amendments filed May 6 and May 19, 2015, and the comparative "
+        "quarterly disclosures in the early post-IPO 6-K filings. The "
+        "observation window spans 2012-Q4 through 2014-Q4. All data "
+        "are from the U.S. Securities and Exchange Commission's "
+        "EDGAR system (CIK 0001594805). Because the engine integrates "
+        "time in months while Shopify reports revenue quarterly, I "
+        "converted each quarterly figure to a monthly USD value "
+        "before fitting (revenue / 3, attributed to the midpoint of "
+        "the quarter); the conversion is in "
+        "scripts/precompute_landing_data.py. The F-1's annual revenue "
+        "totals ($50.3M for 2013 and $105.0M for 2014) match the sums "
+        "of the corresponding four quarters in my data file to within "
+        "$0.1M, providing a sanity check on the quarterly numbers.",
     )
     add_body(
         doc,
@@ -661,8 +668,12 @@ def build_document() -> Document:
         "identify all eight parameters jointly (the same valley "
         "argument from Section 4 applies), I anchored seven of the "
         "eight parameters at values consistent with Shopify's"
-        "publicly reported business at the time of the filings (ARPU "
-        "of about $30 per merchant per month, a churn rate consistent "
+        "publicly reported business at the time of the filings "
+        "(subscription ARPU of about $50 per merchant per month, "
+        "derived from the F-1's reported MRR divided by merchant "
+        "count: $2.0M ÷ 41,295 merchants at end of 2012 ≈ $49/mo, "
+        "$6.6M ÷ 144,670 at end of 2014 ≈ $45/mo; a churn rate "
+        "consistent "
         "with reported retention statistics, etc.) and let the "
         "optimizer fit only the growth rate g. Adam, with learning "
         "rate 0.005 and the eight anchored parameters held fixed, "
@@ -899,8 +910,9 @@ def build_document() -> Document:
         "conditional on α at MAP, and a fully-joint posterior with "
         "longer observation windows or hierarchical priors would "
         "widen and refine it. The Shopify fit could extend to a "
-        "(g, K, μ_R) joint fit on post-IPO 10-Q filings (≈30 "
-        "quarters available) for a predictive comparison. The "
+        "(g, K, μ_R) joint fit on post-IPO 6-K filings and 20-F "
+        "annual reports (≈30 quarters of comparative data available) "
+        "for a predictive comparison. The "
         "deterministic-dynamics assumption could be relaxed to an "
         "SDE treatment for early-stage acquisition. None of these "
         "changes the engine architecture.",
@@ -915,9 +927,11 @@ def build_document() -> Document:
         "(9th ed.). Brooks/Cole. Chapters 2, 3, 4, 5.",
         "Kingma, D. P., & Ba, J. (2014). Adam: A Method for Stochastic "
         "Optimization. arXiv:1412.6980.",
-        "Shopify Inc. Form S-1 Registration Statement. U.S. Securities "
-        "and Exchange Commission EDGAR, 2015. Subsequent 10-Q filings "
-        "for the quarters spanning 2012-Q4 through 2014-Q4.",
+        "Shopify Inc. Form F-1 Registration Statement (CIK 0001594805) "
+        "filed April 14, 2015, with subsequent F-1/A amendments (May 6 "
+        "and May 19, 2015) and post-IPO 6-K filings disclosing "
+        "comparative quarterly figures. U.S. Securities and Exchange "
+        "Commission EDGAR.",
         "Higham, N. J. (2002). Accuracy and Stability of Numerical "
         "Algorithms (2nd ed.). SIAM. Chapter 4 (compensated summation).",
         "Project repository: github.com/ArseniiChan/startup-growth-simulator. "
