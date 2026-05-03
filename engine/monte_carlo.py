@@ -132,7 +132,7 @@ def run_simulation(
     averages is reported. When the valuation is approximately monotonic
     in the perturbation, this halves the variance for the same N.
 
-    Caveat (Phase 3 council review): the post-clip to physical bounds
+    Caveat (Phase 3 design review): the post-clip to physical bounds
     breaks the perfect symmetry between +Z and -Z when one sign of the
     pair lands at LOWER or UPPER. The pair is then biased toward the
     feasible region. In practice this is a small effect when the

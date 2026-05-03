@@ -1,4 +1,4 @@
-# Editorial Navy palette — locked by Phase 4 council.
+# Editorial Navy palette — locked in Phase 4.
 # These four tokens map 1:1 to the Tailwind tokens used by the landing page
 # at startup-growth.vercel.app, so the landing → dashboard handoff reads
 # as a single design system rather than two unrelated surfaces.

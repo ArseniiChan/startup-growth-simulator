@@ -1,11 +1,11 @@
 import type { Config } from "tailwindcss";
 
-// Editorial Navy palette per Phase 4 council verdict.
+// Editorial Navy palette, locked in Phase 4.
 // Background pure white, ink slate-900, accent reserved for the hero number.
-// The slate-600 is the duotone token First Principles called for — used for
-// captions, axis labels, secondary text, the "survives" half of the survives/
-// dies story. The accent red is reserved for: the 14.2% glyph, the failure-
-// mode callout in the body, and one CTA button. Nothing else gets red.
+// The slate-600 is the duotone token used for captions, axis labels,
+// secondary text, and the "survives" half of the survives/dies story.
+// The accent red is reserved for: the 14.2% glyph, the failure-mode
+// callout in the body, and one CTA button. Nothing else gets red.
 
 const config: Config = {
   content: ["./src/**/*.{ts,tsx}"],

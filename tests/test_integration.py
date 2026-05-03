@@ -116,7 +116,7 @@ def test_integrate_trajectory_rejects_nonuniform_grid():
 
 
 def test_integrate_trajectory_handles_odd_subintervals():
-    """Council fix: odd n is allowed (Simpson on n-1 even + trapezoid on last)."""
+    """Edge case: odd n is allowed (Simpson on n-1 even + trapezoid on last)."""
     # ∫ x dx from 0 to 1 = 0.5; with n=5 (odd) we should still be exact-ish
     t = np.linspace(0.0, 1.0, 6)  # 5 subintervals — odd
     y = t.copy()
