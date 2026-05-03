@@ -2,7 +2,7 @@
   "company": "Shopify Inc.",
   "ticker": "SHOP",
   "ipo_date": "2015-05-21",
-  "source": "Shopify S-1 (Form F-1) filed April 2015 + subsequent 10-Q amendments. Public SEC EDGAR data.",
+  "source": "Shopify Form F-1 (CIK 0001594805) filed 2015-04-14, F-1/A amendments 2015-05-06 and 2015-05-19, plus comparative quarterly figures from early post-IPO 6-K filings. Public SEC EDGAR data. Annual totals match: F-1 reports 2013 revenue $50.3M (sum of these 4 Q's: $50.27M) and 2014 revenue $105.0M (sum of these 4 Q's: $104.97M).",
   "metric": "quarterly_revenue_thousands_usd",
   "note": "9 quarters from 2012-Q4 to 2014-Q4. Pre-IPO trajectory used for calibrating the engine's (g, K, mu_R) parameters against real-company revenue growth.",
   "data": [
