@@ -101,12 +101,26 @@ def add_centered(doc, text, *, size=BODY_PT, bold=False, italic=False):
     return p
 
 
+# Figures are deferred to Appendix A so the body of the report stays
+# within the syllabus's 12-15 page target ("If you have lots of tables
+# and/or charts, you can include them in an appendix; the appendix
+# won't count toward the 12 to 15 pages"). Each call to add_figure()
+# records the figure metadata; emit_appendix_figures() renders all of
+# them at the end. Body references like "shown in Figure 4" still
+# resolve because the figures are numbered in the order they appear in
+# the body.
+_DEFERRED_FIGURES: list[tuple[str, str, float]] = []
+
+
 def add_figure(doc, fig_filename, caption, width_inches=4.5):
-    """Embed a figure with a centered caption underneath. The default
-    width is 4.5" (rather than full 6.5" type area) so the figure plus
-    caption fit in the bottom of a partially-used page rather than
-    getting pushed to the next page — saving the cumulative whitespace
-    from many half-empty page breaks."""
+    """Defer a figure to Appendix A; the body of the report only sees the
+    text that references the figure number. Keeps the body within the
+    page-count target."""
+    _DEFERRED_FIGURES.append((fig_filename, caption, width_inches))
+
+
+def _render_figure(doc, fig_filename, caption, width_inches):
+    """Actually emit a figure inline. Used only by emit_appendix_figures()."""
     fig_path = FIG / fig_filename
     if not fig_path.exists():
         raise FileNotFoundError(f"figure missing: {fig_path}")
@@ -115,16 +129,33 @@ def add_figure(doc, fig_filename, caption, width_inches=4.5):
     p.paragraph_format.space_before = Pt(4)
     p.paragraph_format.space_after = Pt(0)
     p.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
-    # Don't let a figure orphan from its caption.
     p.paragraph_format.keep_with_next = True
     run = p.add_run()
     run.add_picture(str(fig_path), width=Inches(width_inches))
     cap = doc.add_paragraph()
     cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    cap.paragraph_format.space_after = Pt(6)
+    cap.paragraph_format.space_after = Pt(10)
     cap.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
     cap_run = cap.add_run(caption)
     _set_run_font(cap_run, size=10, italic=True)
+
+
+def emit_appendix_figures(doc):
+    """Render all deferred figures in an Appendix A section at the end."""
+    if not _DEFERRED_FIGURES:
+        return
+    doc.add_page_break()
+    add_heading(doc, "Appendix A: Figures", level=1)
+    add_body(
+        doc,
+        "All figures referenced in the body of the report, in the order "
+        "they are first cited.",
+        indent_first_line=False,
+    )
+    for fig_filename, caption, width_inches in _DEFERRED_FIGURES:
+        # Use a slightly larger width in the appendix where space isn't
+        # competing with body prose — figures can anchor the page.
+        _render_figure(doc, fig_filename, caption, width_inches=5.5)
 
 
 def add_equation(doc, latex_like_text):
@@ -946,6 +977,10 @@ def build_document() -> Document:
         p.paragraph_format.space_after = Pt(6)
         run = p.add_run(r)
         _set_run_font(run, size=BODY_PT)
+
+    # Appendix A — all figures, deferred from the body so the body stays
+    # within the syllabus's 12-15 page target.
+    emit_appendix_figures(doc)
 
     return doc
 
