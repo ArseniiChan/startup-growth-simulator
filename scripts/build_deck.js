@@ -409,7 +409,7 @@ const TOTAL_SLIDES = 9;
   s.background = { color: WHITE };
   addAccentBar(s);
 
-  s.addText("Calibrated against real data — Shopify Inc. pre-IPO S-1", {
+  s.addText("Calibrated against real data — Shopify Inc. pre-IPO F-1", {
     x: 0.55, y: 0.35, w: 9.2, h: 0.55,
     fontFace: HEADER_FONT, fontSize: 22, color: NAVY, bold: true,
     margin: 0,
@@ -449,7 +449,7 @@ const TOTAL_SLIDES = 9;
   );
 
   s.addText(
-    "Source:  Shopify Inc. S-1 + 10-Q filings,\n2012-Q4 → 2014-Q4  (SEC EDGAR)",
+    "Source:  Shopify Inc. F-1 + F-1/A amendments,\n2012-Q4 → 2014-Q4  (SEC EDGAR)",
     {
       x: 0.55, y: 3.95, w: 4.1, h: 0.6,
       fontFace: "Consolas", fontSize: 10, color: MUTED,
@@ -459,7 +459,7 @@ const TOTAL_SLIDES = 9;
 
   s.addText(
     "Synthetic profiles in the rest of the talk are illustrative\n" +
-    "archetypes. This is the proof the engine fits real revenue.",
+    "archetypes. The engine fits real revenue too.",
     {
       x: 0.55, y: 4.7, w: 4.1, h: 0.7,
       fontFace: BODY_FONT, fontSize: 11, color: INK, italic: true,
@@ -475,7 +475,7 @@ const TOTAL_SLIDES = 9;
   });
 
   s.addText(
-    "Engine RK4 fit (navy) vs S-1 quarterly revenue (coral).",
+    "Engine RK4 fit (navy) vs F-1 quarterly revenue (coral).",
     {
       x: 4.85, y: 4.45, w: 5.0, h: 0.3,
       fontFace: BODY_FONT, fontSize: 10, color: MUTED, italic: true,
@@ -497,7 +497,7 @@ const TOTAL_SLIDES = 9;
     "13.5 percent per month. The fitted trajectory tracks the observed " +
     "quarterly points cleanly.\n\n" +
     "The synthetic profiles in the rest of the talk are illustrative " +
-    "archetypes. This is the proof the engine fits real revenue.\n\n" +
+    "archetypes; this shows the engine fits real revenue too.\n\n" +
     "[target: 40 seconds]"
   );
 }
