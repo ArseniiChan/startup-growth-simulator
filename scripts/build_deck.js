@@ -1,15 +1,14 @@
 // Build the 9-slide CSC 30100 final-project presentation deck.
-// Output: report/Chan_Arsenii_CSC30100_FinalPresentation_navy.pptx
-// (the navy-palette deck; sibling figures live in report/figures/, QR in report/qr/)
-// The primary deliverable deck (template-based) is built by
-// scripts/build_template_deck.py; this navy version is the backup.
+// Output: report/Chan_Arsenii_CSC30100_FinalPresentation.pptx
 //
-// Theme: "Midnight Executive" palette — navy primary, ice-blue secondary, white accent.
-// Title + closing slides are dark; content slides are light. (The "sandwich" structure
-// recommended by the pptx skill: dark for opens/closes, light for content.)
+// Palette: "White / Blue / Grey" — pulled from a modern startup-pitch
+// template so the deck doesn't look like the default class theme.
+// Light slides get a near-white background; dark slides get a charcoal-grey
+// (NOT navy) background with light-blue accents. Sandwich structure
+// preserved (dark title/closing, light content).
 // Fonts: Cambria (headers, math-friendly serif) + Calibri (body).
-// Visual motif: a thin vertical navy accent bar on the left of content slides.
-// (The skill explicitly warns against horizontal accent lines under titles.)
+// Visual motif: a thin vertical accent bar on the left of content slides
+// (now in soft blue instead of navy).
 
 const path = require("path");
 const PptxGenJS = require("pptxgenjs");
@@ -17,16 +16,18 @@ const PptxGenJS = require("pptxgenjs");
 const REPO = path.resolve(__dirname, "..");
 const FIG = path.join(REPO, "report", "figures");
 const QR  = path.join(REPO, "report", "qr");
-const OUT = path.join(REPO, "report", "Chan_Arsenii_CSC30100_FinalPresentation_navy.pptx");
+const OUT = path.join(REPO, "report", "Chan_Arsenii_CSC30100_FinalPresentation.pptx");
 
-// Palette
-const NAVY    = "1E2761";   // primary
-const ICE     = "CADCFC";   // secondary
+// Palette — white / blue / grey, matching the modern pitch template.
+// Variable names kept (NAVY, ICE, ...) so the slide code below doesn't have
+// to change; they just point at the new colors.
+const NAVY    = "3D3F44";   // dark charcoal-grey (was navy) — title + closing slides
+const ICE     = "B7CFEA";   // soft blue (was ice-blue) — secondary text on dark
 const WHITE   = "FFFFFF";
-const INK     = "1E293B";   // body text on light slides
-const MUTED   = "64748B";   // secondary text
-const ACCENT  = "F96167";   // single sharp accent (the μ* number, the "demo" callout)
-const RULE    = "E2E8F0";   // subtle divider
+const INK     = "2D3036";   // body text on light slides (slightly warmer charcoal)
+const MUTED   = "6B7280";   // secondary text
+const ACCENT  = "5B82B5";   // medium blue (was coral) — μ* number, callouts
+const RULE    = "E2E5E8";   // subtle divider
 
 // Typography
 const HEADER_FONT = "Cambria";
