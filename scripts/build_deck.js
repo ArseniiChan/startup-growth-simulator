@@ -1,5 +1,8 @@
 // Build the 9-slide CSC 30100 final-project presentation deck.
-// Output: report/presentation.pptx (sibling figures live in report/figures/, QR in report/qr/)
+// Output: report/Chan_Arsenii_CSC30100_FinalPresentation_navy.pptx
+// (the navy-palette deck; sibling figures live in report/figures/, QR in report/qr/)
+// The primary deliverable deck (template-based) is built by
+// scripts/build_template_deck.py; this navy version is the backup.
 //
 // Theme: "Midnight Executive" palette — navy primary, ice-blue secondary, white accent.
 // Title + closing slides are dark; content slides are light. (The "sandwich" structure
@@ -14,7 +17,7 @@ const PptxGenJS = require("pptxgenjs");
 const REPO = path.resolve(__dirname, "..");
 const FIG = path.join(REPO, "report", "figures");
 const QR  = path.join(REPO, "report", "qr");
-const OUT = path.join(REPO, "report", "presentation.pptx");
+const OUT = path.join(REPO, "report", "Chan_Arsenii_CSC30100_FinalPresentation_navy.pptx");
 
 // Palette
 const NAVY    = "1E2761";   // primary

@@ -233,9 +233,18 @@ out/
 next-env.d.ts
 .vercel/
 
-# Compiled presentation artifacts (regenerated from scripts/build_deck.js)
+# Compiled presentation artifacts — regenerable, excluded from the repo.
+# Primary deck (template-based, build via scripts/build_template_deck.py):
+report/Chan_Arsenii_CSC30100_FinalPresentation.pptx
+report/Chan_Arsenii_CSC30100_FinalPresentation.pdf
+# Backup deck (navy palette, build via `node scripts/build_deck.js`):
+report/Chan_Arsenii_CSC30100_FinalPresentation_navy.pptx
+report/Chan_Arsenii_CSC30100_FinalPresentation_navy.pdf
+# Old filenames (kept ignored as a safety net in case anything still writes them):
 report/presentation.pptx
 report/presentation.pdf
+report/presentation_template.pptx
+report/presentation_template.pdf
 
 # OS / editor cruft
 .DS_Store
