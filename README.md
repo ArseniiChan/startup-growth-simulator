@@ -61,9 +61,10 @@ the live landing page; the calibration script is
 > ⚠ **One caveat in the headline number:** the 95% CI above propagates
 > uncertainty in $(g, \mu_R)$ only — the conversion rate $\alpha$ is
 > held at its calibrated MAP. Because $\alpha$ has the largest sensitivity
-> ($\partial\mu^*/\partial\alpha \approx 3.04$, vs. 1.18 for $\mu_R$ and 0.51
-> for $g$), the marginal CI under joint uncertainty is wider than the
-> conditional CI reported. A full joint posterior is deferred work.
+> ($\partial\mu^*/\partial\alpha \approx 2.70$, roughly twice the $1.35$
+> for $\mu_R$, with the remaining six parameters negligible at the
+> operating point), the marginal CI under joint uncertainty is wider than
+> the conditional CI reported. A full joint posterior is deferred work.
 
 ![convergence](landing/public/figures/convergence.png)
 ![valley](landing/public/figures/valley.png)

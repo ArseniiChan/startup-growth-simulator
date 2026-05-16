@@ -1,6 +1,6 @@
 """Render a presentation-quality root-finder convergence figure.
 
-The README and report cite "Newton 3 iterations, secant 4, bisection 20"
+The README and report cite "Newton 4 iterations, secant 7, bisection 18"
 on the cash break-even problem. This script reproduces those iterations
 on the actual μ* break-even root-finding problem and plots
 log10|x_n − x*| vs. iteration n for all three methods, on a shared axis.

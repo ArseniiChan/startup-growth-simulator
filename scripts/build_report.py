@@ -271,9 +271,10 @@ def build_document() -> Document:
         "μ_R jointly produces a curved valley in the loss surface, a "
         "structural-identifiability finding with condition number "
         "κ(H) ≈ 510 along the calibration directions. A Hessian-"
-        "eigenvector traversal of that valley shifts μ* by "
-        "only ≈2.4%. The calibration is ambiguous; the answer is "
-        "robust. I additionally fit the same engine against nine "
+        "eigenvector traversal of that valley shifts μ* by only ≈2.4%, "
+        "so even an ambiguous calibration leaves the downstream answer "
+        "meaningfully constrained. I additionally fit the same engine "
+        "against nine "
         "quarters of Shopify Inc. pre-IPO quarterly revenue (SEC "
         "EDGAR) as a real-data anchor; the optimizer recovered "
         "g ≈ 13.5% per month in 242 Adam iterations.",
@@ -331,8 +332,8 @@ def build_document() -> Document:
         "(g, μ_R) only, holding the conversion rate α at its "
         "calibrated MAP estimate. Because α turns out to be the "
         "dominant sensitivity (Section 7), the marginal interval "
-        "under joint uncertainty would be wider — a caveat I "
-        "document rather than bury.",
+        "under joint uncertainty would be wider; I flag this again "
+        "in Section 6.",
     )
 
     # ---------------------------------------------------------------------
@@ -363,7 +364,7 @@ def build_document() -> Document:
         "accounting; this formulation replaces an earlier wrong form "
         "(dR/dt = p·α·dU/dt − μ_R·R) that collapsed R to zero at "
         "saturation, a bug caught in Phase 1 (repository commit "
-        "ea83d1e). The cash equation is recognized revenue minus "
+        "abc98b1). The cash equation is recognized revenue minus "
         "fixed costs F minus variable acquisition cost v per newly "
         "acquired user.",
     )
@@ -375,7 +376,12 @@ def build_document() -> Document:
         "any finite [0, T] follow from a Lipschitz argument on the "
         "RHS: each component is polynomial of bounded degree in the "
         "state, so partial derivatives are bounded on any bounded "
-        "set and Picard-Lindelöf applies. The default initial state "
+        "set and Picard-Lindelöf gives local existence and uniqueness. "
+        "An a-priori bound on the trajectory closes global existence "
+        "on [0, T]: U ≤ K is automatic from the logistic cap, A is "
+        "bounded by U, R is a contraction toward p · A so bounded by "
+        "p · K, and Cash is linear in bounded quantities over finite T. "
+        "The default initial state "
         "throughout the report is (U₀, A₀, R₀, Cash₀) = (100 users, "
         "0 paying, $0 MRR, $1,000,000 seed cash).",
     )
@@ -418,14 +424,20 @@ def build_document() -> Document:
         "classical RK4 (O(h⁴)), Adams-Bashforth 4 (AB4, explicit "
         "four-step linear multistep, O(h⁴)), and Adams-Moulton "
         "predictor-corrector (AM-PECE, O(h⁴)). All share a uniform "
-        "Python signature solver(f, y0, (t0, t1), h, *args). Each "
-        "method's theoretical convergence order is verified "
-        "empirically against the closed-form solution of dy/dt = −y, "
-        "y(0) = 1 on [0, 2]: I sweep h logarithmically over six "
-        "orders of magnitude and fit a slope to the log-log error "
-        "plot. Measured slopes match theoretical orders to within "
-        "5%. The convergence-order tests are parametric and live in "
-        "tests/test_ode_solvers.py; pytest reports 114 tests passing.",
+        "Python signature solver(f, y0, (t0, t1), h, *args). AB4 and "
+        "AM-PECE are 4-step methods, so their first three steps are "
+        "seeded by RK4 before the multistep recurrence takes over; the "
+        "fixed bootstrap is the source of the small startup error "
+        "visible in AB4's measured slope of 3.91. Each method's "
+        "theoretical convergence order is verified empirically against "
+        "the closed-form solution of dy/dt = −y, y(0) = 1 on [0, 2]: "
+        "I sweep h logarithmically and fit a slope to the log-log error "
+        "plot, restricting the fit window to the truncation-dominated "
+        "regime (h ∈ [10⁻³, 10⁰]) so the round-off floor at small h "
+        "does not pull the slope flat. Measured slopes match "
+        "theoretical orders to within 5%. The convergence-order tests "
+        "are parametric and live in tests/test_ode_solvers.py; pytest "
+        "reports 114 tests passing.",
     )
     add_figure(
         doc,
@@ -526,10 +538,11 @@ def build_document() -> Document:
     add_heading(doc, "3.5. Numerical integration", level=2)
     add_body(
         doc,
-        "Two quadrature schemes (Burden Ch. 4.3, 4.4): composite "
-        "Simpson's rule with N subintervals (global error O(h⁴), "
-        "h = (b − a)/N), and Gauss-Legendre with 2-, 3-, and 5-"
-        "point rules (5-point exact for polynomials of degree ≤ 9). "
+        "Two quadrature schemes: composite Simpson's rule (Burden "
+        "Ch. 4.3–4.4) with N subintervals (global error O(h⁴), "
+        "h = (b − a)/N), and Gauss-Legendre (Burden Ch. 4.7) with 2-, "
+        "3-, and 5-point rules (5-point exact for polynomials of "
+        "degree ≤ 9). "
         "test_simpson_convergence_order verifies the O(h⁴) rate "
         "empirically. Quadrature is used to integrate revenue and "
         "cost streams over fixed horizons.",
@@ -556,17 +569,18 @@ def build_document() -> Document:
         "relative error of order N · ε. For the parameter-posterior "
         "Monte Carlo (Section 6, N = 199, but extensions to N = 10⁶ "
         "follow the same code) I use Kahan compensated summation "
-        "(engine.monte_carlo.kahan_sum), which keeps a running "
+        "(engine.monte_carlo.kahan_sum; Higham, 2002, Ch. 4), which "
+        "keeps a running "
         "compensation term and reduces the error to O(ε) "
         "independent of N. The test "
         "test_kahan_beats_naive_on_pathological_sum confirms this "
         "on the canonical bad input (1e8 added to one million copies "
         "of 1e-8): naive summation loses essentially all the small "
         "terms while Kahan recovers them. I also implemented "
-        "antithetic-variate sampling, with the honest caveat (in the "
-        "engine docstrings) that clipping to physical bounds breaks "
-        "the +Z/−Z symmetry near the bounds and partially defeats "
-        "the variance reduction.",
+        "antithetic-variate sampling, with a caveat in the engine "
+        "docstrings that clipping to physical bounds breaks the "
+        "+Z/−Z symmetry near the bounds and partially defeats the "
+        "variance reduction.",
     )
 
     # ---------------------------------------------------------------------
@@ -593,9 +607,9 @@ def build_document() -> Document:
         "other seven parameters at their truth values and asking only "
         "for g) works well: gradient descent and Adam both converge"
         "to within 1% of g_truth in fewer than 200 iterations, "
-        "regardless of starting point in the physical range. The "
-        "interesting failure mode appears when I attempt to recover "
-        "two parameters jointly. Holding all parameters fixed except "
+        "regardless of starting point in the physical range. Things "
+        "break when I try to recover two parameters jointly. Holding "
+        "all parameters fixed except "
         "g and the billing-cycle lag rate μ_R, the optimizer no "
         "longer converges to a single point but instead drifts along "
         "a curved one-dimensional valley in (g, μ_R) space.",
@@ -619,9 +633,10 @@ def build_document() -> Document:
         "mimicking the effect of a higher growth rate g on the "
         "observed MRR trajectory. Over a finite observation window, "
         "the two effects are distinguishable only weakly because the "
-        "curvature signature that discriminates them is at the fourth "
-        "time-derivative level and is buried in observation noise. "
-        "As the window lengthens, the valley contracts; in the limit "
+        "curvature signature that discriminates them shows up only at "
+        "higher time-derivatives of R(t), and is buried in observation "
+        "noise. As the window lengthens, the valley contracts; in the "
+        "limit "
         "T → ∞ the parameters become identifiable. This is the "
         "textbook signature of structural identifiability degrading "
         "with finite observation horizons.",
@@ -631,9 +646,11 @@ def build_document() -> Document:
         "I quantified the conditioning explicitly. The Hessian H of "
         "the loss surface at the local minimum, computed by the "
         "from-scratch engine.differentiation.second_derivative "
-        "routine in (g, μ_R) coordinates, has eigenvalues differing "
-        "by roughly two and a half orders of magnitude: the "
-        "condition number κ(H) = λ_max / λ_min ≈ 510. The loss "
+        "routine in (g, μ_R) coordinates with adaptive h scaled to "
+        "each parameter's magnitude (§3.4) and the result symmetrized, "
+        "has eigenvalues differing by roughly two and a half orders "
+        "of magnitude: the condition number κ(H) = λ_max / λ_min ≈ "
+        "510. The loss "
         "surface curves away from the minimum about 500 times "
         "faster perpendicular to the valley than along it. A finite "
         "observation window can only resolve directions whose "
@@ -648,7 +665,7 @@ def build_document() -> Document:
         "direction the data is least informative about) and "
         "recomputing μ* at each step, the threshold drifts by only "
         "≈2.4% across the full traversal. The calibration is "
-        "ambiguous; the answer is robust.",
+        "ambiguous; the answer is robust to that ambiguity.",
     )
     add_figure(
         doc,
@@ -707,7 +724,7 @@ def build_document() -> Document:
         "consistent "
         "with reported retention statistics, etc.) and let the "
         "optimizer fit only the growth rate g. Adam, with learning "
-        "rate 0.005 and the eight anchored parameters held fixed, "
+        "rate 0.005 and the seven anchored parameters held fixed, "
         "converged in 242 iterations to g = 13.51% per month. The "
         "fitted RK4 trajectory is overlaid on the observed quarterly "
         "points in Figure 6.",
@@ -730,7 +747,7 @@ def build_document() -> Document:
     )
     add_body(
         doc,
-        "The fit is honest but imperfect. Residuals are non-white: "
+        "The fit isn't perfect. Residuals are non-white: "
         "the engine's curve sits below the observed values in the "
         "first six quarters and crosses through the data in the "
         "later quarters. With only g free, the model cannot "
@@ -764,10 +781,12 @@ def build_document() -> Document:
         "denotes the calibrated value) and the dependence on μ "
         "comes only through the explicit μ argument since I am "
         "sweeping that one parameter. C is monotone decreasing in μ "
-        "(higher churn always reduces terminal cash), C(μ → 0⁺) > 0 "
-        "(low churn → company survives), and C(μ → 0.5⁻) < 0 (high "
-        "churn → company dies before T). By the intermediate-value "
-        "theorem there is exactly one μ* ∈ (0, 0.5) with C(μ*) = 0. "
+        "over (0, 0.5): higher churn shrinks A which shrinks R, and "
+        "the variable acquisition cost in the cash equation does not "
+        "depend on μ, so dC/dμ < 0 throughout the bracket — confirmed "
+        "empirically by a sweep at 50 evenly-spaced μ values. With "
+        "C(μ → 0⁺) > 0 and C(μ → 0.5⁻) < 0, the intermediate-value "
+        "theorem gives exactly one μ* ∈ (0, 0.5) with C(μ*) = 0. "
         "I find μ* by Newton's method (Section 3.3) starting from "
         "μ = 0.13. Convergence is shown in Figure 3 above. The "
         "result, for the synthetic default-SaaS profile, is",
@@ -810,9 +829,12 @@ def build_document() -> Document:
         "carry uncertainty inherited from the finite-data calibration, "
         "and that uncertainty must propagate to μ*. I draw 199 "
         "samples from a multivariate Gaussian centered at θ_* with "
-        "covariance equal to the inverse Hessian of the loss surface "
-        "(the standard Laplace approximation to the calibrated "
-        "posterior). For each sample I solve the ODE to T = 120, "
+        "covariance σ² · H⁻¹, where H is the Hessian of the MSE loss "
+        "at θ_* and σ ≈ 5% of the signal magnitude is the assumed "
+        "noise standard deviation that defines the implicit Gaussian "
+        "likelihood (the standard Laplace approximation to the "
+        "calibrated posterior). For each sample I solve the ODE to "
+        "T = 120, "
         "find the root of C(μ), and record the resulting μ*. The "
         "Monte Carlo posterior over μ* is shown in Figure 7.",
     )
@@ -833,9 +855,9 @@ def build_document() -> Document:
         "The 95% credible interval is [8.02%, 15.99%]. This is the "
         "central interval rather than the highest-posterior-density "
         "interval, which I chose for ease of reproducibility from "
-        "the empirical samples. In words: under the calibrated "
-        "Gaussian approximation to the parameter posterior and the "
-        "default-SaaS anchored values, with 95% credibility the "
+        "the empirical samples. Under the calibrated Gaussian "
+        "approximation to the parameter posterior and the default-"
+        "SaaS anchored values, then, with 95% credibility the "
         "company runs out of money at a churn rate between 8.0% and "
         "16.0% per month.",
     )
@@ -846,9 +868,10 @@ def build_document() -> Document:
         "parameters whose calibration is rigorously characterized in "
         "Section 4, while α and the remaining five parameters are "
         "held at their MAP estimates. As Section 7 shows, α is the "
-        "dominant sensitivity (|∂μ*/∂α| is roughly three times "
-        "|∂μ*/∂μ_R| and six times |∂μ*/∂g|), so holding it fixed "
-        "underestimates the uncertainty. The marginal credible "
+        "dominant sensitivity (|∂μ*/∂α| is roughly twice |∂μ*/∂μ_R|, "
+        "and the remaining six parameters contribute negligibly), so "
+        "holding it fixed underestimates the uncertainty. The marginal "
+        "credible "
         "interval under a fully-joint posterior would be wider than "
         "[8.0%, 16.0%]. I treat the fully-joint posterior as "
         "deferred work.",
@@ -874,13 +897,12 @@ def build_document() -> Document:
         "nb05_tornado.png",
         "Figure 8. Sensitivity tornado: |∂μ*/∂θ_i| for each of the "
         "eight model parameters, sorted by magnitude. Conversion "
-        "rate α dominates with |∂μ*/∂α| ≈ 3.04 (per unit α), more "
-        "than twice the next-strongest parameter (billing-cycle "
-        "lag μ_R, |∂μ*/∂μ_R| ≈ 1.18) and six times growth rate g "
-        "(|∂μ*/∂g| ≈ 0.51). Variable cost per acquired user (v) "
-        "is the only negative-signed sensitivity; market size K, "
-        "ARPU p, and fixed costs F have negligible effect at the "
-        "default-SaaS operating point.",
+        "rate α dominates with |∂μ*/∂α| ≈ 2.70 (per unit α), exactly "
+        "twice the next-strongest parameter (billing-cycle lag μ_R, "
+        "|∂μ*/∂μ_R| ≈ 1.35). At the default-SaaS operating point the "
+        "remaining six parameters (g, K, p, μ, F, v) all have "
+        "sensitivities at or below the noise floor of the finite-"
+        "difference scheme and are reported as negligible.",
     )
     add_body(
         doc,
@@ -891,13 +913,13 @@ def build_document() -> Document:
         "uncertainty were propagated and α had a one-percent "
         "calibration uncertainty (relative to its 5% calibrated "
         "value, that is roughly ±0.0005 absolute), the marginal CI "
-        "on μ* would widen by roughly 3.04 × 0.0005 = 0.15 "
-        "percentage points — a non-trivial fraction of the "
-        "currently-reported 8% interval half-width. Interpretively: "
-        "the dominant lever for surviving as a SaaS startup is not "
-        "to grow faster (small effect on μ*) but to convert "
-        "harder (large effect on μ*). Acquisition without "
-        "conversion does not pay rent.",
+        "on μ* would widen by roughly 2.70 × 0.0005 = 0.14 "
+        "percentage points — small relative to the 8-percentage-"
+        "point full width of the currently-reported CI, but "
+        "non-zero. Interpretively: the "
+        "dominant lever for surviving as a SaaS startup is not "
+        "to grow faster (negligible effect on μ*) but to convert "
+        "harder (largest effect on μ*).",
     )
 
     # ---------------------------------------------------------------------
@@ -906,34 +928,29 @@ def build_document() -> Document:
     add_heading(doc, "8. Conclusions, Limitations, and Future Work", level=1)
     add_body(
         doc,
-        "Three substantive findings emerged from this project. The "
-        "first is the headline number: for a representative SaaS "
+        "The headline result is that for a representative SaaS "
         "profile, the company-runs-out-of-money churn threshold is "
         "μ* ≈ 14.2% per month with a (conditional) 95% credible "
-        "interval of [8.0%, 16.0%]. The second is the structural-"
-        "identifiability finding: when calibrating from finite noisy "
-        "revenue data, the parameters g and μ_R are not separately "
-        "identifiable. They live on a curved valley in loss space "
-        "with condition number κ ≈ 510 along the calibration "
-        "directions, yet μ* itself drifts by only about 2.4% along "
-        "the worst-conditioned direction of that valley. Even an "
-        "ambiguous calibration produces a robust answer to the "
-        "downstream question. The third finding is the sensitivity "
-        "ranking: conversion rate α dominates μ*, growth rate g and "
-        "billing-cycle lag μ_R are second-order, and the remaining "
-        "five parameters are negligible at the operating point.",
+        "interval of [8.0%, 16.0%]. Underneath that headline sits "
+        "the structural-identifiability finding: when calibrating "
+        "from finite noisy revenue data, g and μ_R live on a curved "
+        "valley with condition number κ ≈ 510, yet μ* itself drifts "
+        "by only about 2.4% along the worst-conditioned direction "
+        "of that valley. And the sensitivity ranking from Section 7 "
+        "(α dominant, μ_R second, the remaining six parameters "
+        "negligible at the operating point) is what tells us where "
+        "the ambiguity in the conditional CI actually lives.",
     )
     add_body(
         doc,
-        "Three lessons. First: a wrong model produces precise "
-        "nonsense. A Phase-1 structural defect in the revenue "
-        "equation would have been hidden by a cleanly-converging "
-        "calibration if it had survived that long. Second: "
-        "identifiability matters more than accuracy. A low MSE on "
-        "a non-identifiable problem is meaningless. Third: "
-        "validation-first separates engineering from coursework, "
-        "with tests written before notebooks gating downstream "
-        "work.",
+        "A few things this project taught me. The wrong model can "
+        "converge cleanly to a precise answer to the wrong question; "
+        "I caught the Phase-1 revenue-equation defect early, but it "
+        "would have been hidden by clean calibration if it had "
+        "survived. Identifiability matters more than accuracy: a low "
+        "MSE on a non-identifiable problem is meaningless. And "
+        "writing tests before the notebooks that use them kept me "
+        "from chasing ghosts later.",
     )
     add_body(
         doc,
@@ -945,8 +962,8 @@ def build_document() -> Document:
         "annual reports (≈30 quarters of comparative data available) "
         "for a predictive comparison. The "
         "deterministic-dynamics assumption could be relaxed to an "
-        "SDE treatment for early-stage acquisition. None of these "
-        "changes the engine architecture.",
+        "SDE treatment for early-stage acquisition. All of these "
+        "would reuse the same engine.",
     )
 
     # ---------------------------------------------------------------------
