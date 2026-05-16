@@ -253,8 +253,3 @@ report/Chan_Arsenii_CSC30100_FinalPresentation_navy.pdf
 ~$*.docx
 ~$*.doc
 ~$*.xlsx
-
-# Local working notes / AI-assistant scratchpads — never commit
-CLAUDE.md
-.aider*
-.cursor/
