@@ -233,7 +233,7 @@ const TOTAL_SLIDES = 9;
 
   // Eight-parameter callout at bottom right
   s.addText(
-    "Eight parameters, public-data-estimable: g, K, α, μ, p, μ_R, F, v.",
+    "Eight parameters, public-data-informed: g, K, α, μ, p, μ_R, F, v.",
     {
       x: 0.55, y: 4.95, w: 9, h: 0.35,
       fontFace: BODY_FONT, fontSize: 12, color: MUTED, italic: true,
@@ -255,7 +255,10 @@ const TOTAL_SLIDES = 9;
     "churn, and costs. The inset on the right shows the default profile " +
     "run for 60 months — the S-curve in users, revenue catching up, " +
     "and cash dipping before it recovers.\n\n" +
-    "[target: 50 seconds]"
+    "The billing-cycle lag in equation three is what makes this hard. " +
+    "Drop it and revenue tracks paying users instantly — you're back " +
+    "to a textbook logistic minus costs.\n\n" +
+    "[target: 55 seconds]"
   );
 }
 
@@ -315,11 +318,12 @@ const TOTAL_SLIDES = 9;
   });
 
   s.addText(
-    "No SciPy. Each method matches its theoretical convergence " +
-    "order to within 4%.",
+    "No SciPy. Each method matches its theoretical convergence order " +
+    "to within 5%. Same engine also ships natural & clamped cubic splines " +
+    "(Ch. 3, Thomas algorithm) and composite Simpson / Gauss-Legendre (Ch. 4).",
     {
-      x: 0.55, y: 5.05, w: 9.2, h: 0.35,
-      fontFace: BODY_FONT, fontSize: 12, color: MUTED, italic: true,
+      x: 0.55, y: 5.05, w: 9.2, h: 0.55,
+      fontFace: BODY_FONT, fontSize: 11, color: MUTED, italic: true,
       align: "left", margin: 0,
     }
   );
@@ -329,12 +333,17 @@ const TOTAL_SLIDES = 9;
   s.addNotes(
     "I implemented all five O-D-E solvers from scratch — no SciPy. " +
     "Each method matches its theoretical convergence order to within " +
-    "4 percent. Euler at slope one, Heun at slope two, the three " +
-    "fourth-order methods at slope four. The lines you see on this " +
-    "log-log plot are the proof.\n\n" +
-    "Without this slide, every number downstream is a guess. This is " +
-    "the contract everything else rests on.\n\n" +
-    "[target: 45 seconds]"
+    "5 percent. Euler at slope one, Heun at slope two, the three " +
+    "fourth-order methods at slope four. The lines on this log-log " +
+    "plot are the verification.\n\n" +
+    "Same engine also ships cubic splines from Chapter 3 — built on " +
+    "a from-scratch Thomas algorithm — and composite Simpson plus " +
+    "Gauss-Legendre quadrature from Chapter 4. Every downstream " +
+    "number rests on this contract.\n\n" +
+    "Quick note on A-B-4 — it lands at three-point-nine, not four. " +
+    "That's startup error from bootstrapping with R-K-4. Known issue, " +
+    "bounded, doesn't break the order test.\n\n" +
+    "[target: 55 seconds]"
   );
 }
 
@@ -385,20 +394,21 @@ const TOTAL_SLIDES = 9;
   addPageNumber(s, 5, TOTAL_SLIDES);
 
   s.addNotes(
-    "I fit the model to noisy revenue data using gradient descent and " +
-    "Adam — both written from scratch. The growth rate recovers to " +
-    "within one percent of truth.\n\n" +
+    "I fit the model to noisy synthetic revenue data using gradient " +
+    "descent and Adam — both written from scratch. The growth rate " +
+    "recovers to within one percent of truth on synthetic data.\n\n" +
     "But when I fit growth rate AND billing-cycle lag together, I get " +
     "this curved valley — not a single point. The two parameters trade " +
     "off, because a faster lag mimics a higher growth rate over a " +
-    "finite observation window. That's what's called structural " +
-    "identifiability.\n\n" +
+    "finite observation window. This is structural identifiability.\n\n" +
     "So I asked the harder question: does that ambiguity matter for " +
     "the answer? I walked along the valley's worst direction — the " +
-    "eigenvector the data is least informative about — and recomputed " +
-    "the threshold. It moves by only about 2.4 percent. The calibration " +
+    "direction the data constrains least — and recomputed the " +
+    "threshold. It moves by only about 2.4 percent. The calibration " +
     "is ambiguous, but the answer is robust.\n\n" +
-    "[target: 60 seconds]"
+    "That direction is the smallest-eigenvalue eigenvector of the loss " +
+    "Hessian — basically the worst-case direction.\n\n" +
+    "[target: 65 seconds]"
   );
 }
 
@@ -491,15 +501,14 @@ const TOTAL_SLIDES = 9;
 
   s.addNotes(
     "To answer where these numbers come from — I also calibrated the " +
-    "engine against real data. I pulled nine quarters of Shopify's " +
-    "pre-I-P-O revenue from public SEC filings, late 2012 through the " +
-    "end of 2014.\n\n" +
+    "engine against real data. I pulled Shopify's pre-I-P-O revenue " +
+    "from public SEC filings: Q4 2012 through Q4 2014 — nine " +
+    "quarters.\n\n" +
     "I ran the same Adam optimizer, fitting only the growth rate, " +
-    "because the data window is too short to identify the lag " +
-    "separately — same valley finding from the previous slide. It " +
-    "converged in 242 iterations and recovered a growth rate of " +
-    "13.5 percent per month. The fitted trajectory tracks the observed " +
-    "quarterly points cleanly.\n\n" +
+    "because the window is too short to identify the lag separately " +
+    "— same valley finding from the previous slide. It converged in " +
+    "242 iterations at thirteen point five percent per month. The " +
+    "fitted trajectory tracks the observed quarterly points cleanly.\n\n" +
     "The synthetic profiles in the rest of the talk are illustrative " +
     "archetypes; this shows the engine fits real revenue too.\n\n" +
     "[target: 40 seconds]"
@@ -538,7 +547,7 @@ const TOTAL_SLIDES = 9;
 
   // Subtitle
   s.addText(
-    "Three root-finders, one root.  Newton 3 iters  <  secant 4  <  bisection 20.",
+    "Three root-finders, one root.  Newton 4 iters  <  secant 7  <  bisection 18.",
     {
       x: 0.55, y: 1.65, w: 9.2, h: 0.35,
       fontFace: BODY_FONT, fontSize: 13, color: MUTED, italic: true,
@@ -563,7 +572,7 @@ const TOTAL_SLIDES = 9;
     x: 5.15, y: 2.15, w: 4.5, h: 2.6,
     sizing: { type: "contain", w: 4.5, h: 2.6 },
   });
-  s.addText("Sensitivity of μ* — α dominates 3:1", {
+  s.addText("Sensitivity of μ* — α dominates ~2.6:1", {
     x: 5.15, y: 4.8, w: 4.5, h: 0.3,
     fontFace: BODY_FONT, fontSize: 11, color: MUTED, italic: true,
     align: "center", margin: 0,
@@ -586,17 +595,18 @@ const TOTAL_SLIDES = 9;
   s.addNotes(
     "I sampled the calibrated parameters from a Monte Carlo posterior, " +
     "ran the O-D-E for each sample, and used Newton's method to find " +
-    "break-even on the cash curve. Three root-finders — Newton in three " +
-    "iterations, secant in four, bisection in twenty — all converge to " +
-    "the same answer.\n\n" +
+    "break-even on the cash curve. Three root-finders — Newton in four " +
+    "iterations, secant in seven, bisection in eighteen — all converge " +
+    "to the same answer.\n\n" +
     "The critical churn rate above which the business never recovers " +
-    "within ten years is fourteen point two percent per month. The " +
-    "95 percent confidence interval is 8 to 16 percent.\n\n" +
+    "within ten years is fourteen point one seven percent per month — " +
+    "I'll round to fourteen point two. The 95 percent confidence " +
+    "interval is 8 to 16 percent.\n\n" +
     "On the right is the sensitivity tornado. Conversion rate alpha " +
-    "dominates — its bar is three times longer than the next-strongest " +
-    "parameter. That's why the confidence interval on the left holds " +
-    "alpha fixed at its calibrated value. A joint posterior would be " +
-    "wider, and I document that in the report.\n\n" +
+    "dominates — its bar is roughly two-point-six times the next-" +
+    "strongest parameter, μ_R. That's why the confidence interval on " +
+    "the left holds alpha fixed at its calibrated value. A joint " +
+    "posterior would be wider, and I document that in the report.\n\n" +
     "[target: 60 seconds]"
   );
 }
@@ -731,9 +741,8 @@ const TOTAL_SLIDES = 9;
 
   s.addNotes(
     "Code is on GitHub. The dashboard is live — scan the QR.\n\n" +
-    "What startup would you fund?\n\n" +
     "Thanks.\n\n" +
-    "[target: 15 seconds]"
+    "[target: 12 seconds]"
   );
 }
 
