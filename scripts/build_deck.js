@@ -102,8 +102,7 @@ const TOTAL_SLIDES = 9;
   s.addNotes(
     "Hi, I'm Arsenii. For my Numerical Analysis final, I built a " +
     "startup-survival threshold calculator from scratch — and I want " +
-    "to walk you through what it found.\n\n" +
-    "[target: 10 seconds]"
+    "to walk you through what it found."
   );
 }
 
@@ -163,8 +162,7 @@ const TOTAL_SLIDES = 9;
     "14 percent.\n\n" +
     "Below 14 percent monthly churn, the company survives. Above 14, " +
     "it doesn't. Let me show you how I found it, and how confident I " +
-    "am in the answer.\n\n" +
-    "[target: 40 seconds]"
+    "am in the answer."
   );
 }
 
@@ -257,8 +255,7 @@ const TOTAL_SLIDES = 9;
     "and cash dipping before it recovers.\n\n" +
     "The billing-cycle lag in equation three is what makes this hard. " +
     "Drop it and revenue tracks paying users instantly — you're back " +
-    "to a textbook logistic minus costs.\n\n" +
-    "[target: 55 seconds]"
+    "to a textbook logistic minus costs."
   );
 }
 
@@ -341,9 +338,9 @@ const TOTAL_SLIDES = 9;
     "Gauss-Legendre quadrature from Chapter 4. Every downstream " +
     "number rests on this contract.\n\n" +
     "Quick note on A-B-4 — it lands at three-point-nine, not four. " +
-    "That's startup error from bootstrapping with R-K-4. Known issue, " +
-    "bounded, doesn't break the order test.\n\n" +
-    "[target: 55 seconds]"
+    "A-B-4 needs R-K-4 to seed its first few steps, and that seed " +
+    "leaks a bit of error. Known issue, bounded, doesn't break the " +
+    "order test."
   );
 }
 
@@ -407,8 +404,7 @@ const TOTAL_SLIDES = 9;
     "threshold. It moves by only about 2.4 percent. The calibration " +
     "is ambiguous, but the answer is robust.\n\n" +
     "That direction is the smallest-eigenvalue eigenvector of the loss " +
-    "Hessian — basically the worst-case direction.\n\n" +
-    "[target: 65 seconds]"
+    "Hessian — basically the worst-case direction."
   );
 }
 
@@ -510,8 +506,7 @@ const TOTAL_SLIDES = 9;
     "242 iterations at thirteen point five percent per month. The " +
     "fitted trajectory tracks the observed quarterly points cleanly.\n\n" +
     "The synthetic profiles in the rest of the talk are illustrative " +
-    "archetypes; this shows the engine fits real revenue too.\n\n" +
-    "[target: 40 seconds]"
+    "archetypes; this shows the engine fits real revenue too."
   );
 }
 
@@ -604,10 +599,10 @@ const TOTAL_SLIDES = 9;
     "interval is 8 to 16 percent.\n\n" +
     "On the right is the sensitivity tornado. Conversion rate alpha " +
     "dominates — its bar is roughly two-point-six times the next-" +
-    "strongest parameter, μ_R. That's why the confidence interval on " +
-    "the left holds alpha fixed at its calibrated value. A joint " +
-    "posterior would be wider, and I document that in the report.\n\n" +
-    "[target: 60 seconds]"
+    "strongest parameter, mu-R, the billing-cycle lag rate. That's " +
+    "why the confidence interval on the left holds alpha fixed at its " +
+    "calibrated value. Letting all the parameters vary at once would " +
+    "give a wider interval, and I document that in the report."
   );
 }
 
@@ -694,8 +689,7 @@ const TOTAL_SLIDES = 9;
     "Two — identifiability matters more than accuracy. Whether you " +
     "CAN recover a parameter is the deeper question.\n\n" +
     "Three — writing tests before notebook code is the discipline that " +
-    "separates engineering from coursework.\n\n" +
-    "[target: 30 seconds]"
+    "separates engineering from coursework."
   );
 }
 
@@ -741,8 +735,7 @@ const TOTAL_SLIDES = 9;
 
   s.addNotes(
     "Code is on GitHub. The dashboard is live — scan the QR.\n\n" +
-    "Thanks.\n\n" +
-    "[target: 12 seconds]"
+    "Thanks."
   );
 }
 
